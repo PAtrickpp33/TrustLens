@@ -1,0 +1,26 @@
+/* Ant Design custom theme overrides */
+.ant-btn-primary {
+  background-color: #374151 !important;
+  border-color: #374151 !important;
+  color: white !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #4b5563 !important;
+  border-color: #4b5563 !important;
+  color: white !important;
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px rgba(55, 65, 81, 0.3);
+}
+
+.ant-btn-primary:active {
+  background-color: #374151 !important;
+  border-color: #374151 !important;
+  transform: scale(0.98);
+}
+
+.ant-btn {
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
