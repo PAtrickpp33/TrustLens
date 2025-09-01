@@ -15,3 +15,30 @@ class EmailRiskResponse(BaseModel):
     report_count: int
     source: str | None = None
     notes: str | None = None
+
+
+class EmailSetDeletedRequest(BaseModel):
+    address: str = Field(..., description="Email address")
+    is_deleted: int = Field(..., ge=0, le=1, description="0 or 1")
+
+
+class EmailSetNotesRequest(BaseModel):
+    address: str = Field(..., description="Email address")
+    notes: str | None = Field(default=None, max_length=512)
+
+
+class EmailSetRiskLevelRequest(BaseModel):
+    address: str = Field(..., description="Email address")
+    risk_level: int = Field(..., ge=0, le=3)
+
+
+class EmailImportItem(BaseModel):
+    address: str
+    risk_level: int | None = Field(default=None, ge=0, le=3)
+    notes: str | None = Field(default=None, max_length=512)
+    mx_valid: int | None = Field(default=None, ge=0, le=1)
+    disposable: int | None = Field(default=None, ge=0, le=1)
+
+
+class EmailBatchImportRequest(BaseModel):
+    items: list[EmailImportItem]

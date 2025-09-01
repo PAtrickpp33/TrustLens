@@ -15,3 +15,28 @@ class MobileRiskResponse(BaseModel):
     report_count: int
     source: str | None = None
     notes: str | None = None
+
+
+class MobileSetDeletedRequest(BaseModel):
+    e164: str = Field(..., description="Full E.164 phone")
+    is_deleted: int = Field(..., ge=0, le=1, description="0 or 1")
+
+
+class MobileSetNotesRequest(BaseModel):
+    e164: str = Field(..., description="Full E.164 phone")
+    notes: str | None = Field(default=None, max_length=512)
+
+
+class MobileSetRiskLevelRequest(BaseModel):
+    e164: str = Field(..., description="Full E.164 phone")
+    risk_level: int = Field(..., ge=0, le=3)
+
+
+class MobileImportItem(BaseModel):
+    e164: str
+    risk_level: int | None = Field(default=None, ge=0, le=3)
+    notes: str | None = Field(default=None, max_length=512)
+
+
+class MobileBatchImportRequest(BaseModel):
+    items: list[MobileImportItem]

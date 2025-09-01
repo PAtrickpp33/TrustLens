@@ -32,6 +32,33 @@ class SqlAlchemyMobileRiskRepository(MobileRiskRepository):
             notes=row.notes,
         )
 
+    def set_is_deleted(self, *, e164: str, is_deleted: int) -> bool:
+        stmt = select(RiskMobile).where(RiskMobile.e164 == e164)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.is_deleted = 1 if is_deleted else 0
+        self.session.flush()
+        return True
+
+    def set_notes(self, *, e164: str, notes: str | None) -> bool:
+        stmt = select(RiskMobile).where(RiskMobile.e164 == e164, RiskMobile.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.notes = notes
+        self.session.flush()
+        return True
+
+    def set_risk_level(self, *, e164: str, risk_level: int) -> bool:
+        stmt = select(RiskMobile).where(RiskMobile.e164 == e164, RiskMobile.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.risk_level = risk_level
+        self.session.flush()
+        return True
+
     def upsert_report(self, *, e164: str, country_code: str, national_number: str, source: Optional[str], notes: Optional[str], risk_level: Optional[int]) -> MobileRisk:
         stmt = select(RiskMobile).where(RiskMobile.e164 == e164)
         row = self.session.execute(stmt).scalar_one_or_none()
@@ -94,6 +121,33 @@ class SqlAlchemyEmailRiskRepository(EmailRiskRepository):
             last_reported_at=row.last_reported_at,
             notes=row.notes,
         )
+
+    def set_is_deleted(self, *, address: str, is_deleted: int) -> bool:
+        stmt = select(RiskEmail).where(RiskEmail.address == address)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.is_deleted = 1 if is_deleted else 0
+        self.session.flush()
+        return True
+
+    def set_notes(self, *, address: str, notes: str | None) -> bool:
+        stmt = select(RiskEmail).where(RiskEmail.address == address, RiskEmail.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.notes = notes
+        self.session.flush()
+        return True
+
+    def set_risk_level(self, *, address: str, risk_level: int) -> bool:
+        stmt = select(RiskEmail).where(RiskEmail.address == address, RiskEmail.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.risk_level = risk_level
+        self.session.flush()
+        return True
 
     def upsert_report(self, *, address: str, local_part: str, domain: str, source: Optional[str], notes: Optional[str], risk_level: Optional[int], mx_valid: Optional[int], disposable: Optional[int]) -> EmailRisk:
         stmt = select(RiskEmail).where(RiskEmail.address == address)
@@ -166,6 +220,33 @@ class SqlAlchemyUrlRiskRepository(UrlRiskRepository):
             last_reported_at=row.last_reported_at,
             notes=row.notes,
         )
+
+    def set_is_deleted_by_sha(self, *, url_sha256: str, is_deleted: int) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.is_deleted = 1 if is_deleted else 0
+        self.session.flush()
+        return True
+
+    def set_notes_by_sha(self, *, url_sha256: str, notes: str | None) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256, RiskUrl.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.notes = notes
+        self.session.flush()
+        return True
+
+    def set_risk_level_by_sha(self, *, url_sha256: str, risk_level: int) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256, RiskUrl.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.risk_level = risk_level
+        self.session.flush()
+        return True
 
     def upsert_report(self, *, full_url: str, url_sha256: str, scheme: str, host: str, registrable_domain: Optional[str], source: Optional[str], notes: Optional[str], risk_level: Optional[int], phishing_flag: Optional[int]) -> UrlRisk:
         stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256)

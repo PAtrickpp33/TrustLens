@@ -26,3 +26,44 @@ class MobileRiskService:
         entity = self.repo.upsert_report(e164=e164_norm, country_code=cc, national_number=nn, source=source, notes=notes, risk_level=risk_level)
         self.session.commit()
         return entity
+
+    def set_is_deleted(self, *, e164: str, is_deleted: int) -> bool:
+        e164_norm, _, _ = normalize_phone(e164=e164, country_code=None, national_number=None)
+        updated = self.repo.set_is_deleted(e164=e164_norm, is_deleted=is_deleted)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def set_notes(self, *, e164: str, notes: str | None) -> bool:
+        e164_norm, _, _ = normalize_phone(e164=e164, country_code=None, national_number=None)
+        updated = self.repo.set_notes(e164=e164_norm, notes=notes)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def set_risk_level(self, *, e164: str, risk_level: int) -> bool:
+        e164_norm, _, _ = normalize_phone(e164=e164, country_code=None, national_number=None)
+        updated = self.repo.set_risk_level(e164=e164_norm, risk_level=risk_level)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def batch_import(self, items: list[tuple[str, int | None, str | None]]) -> int:
+        """Batch import mobiles.
+
+        items: list of tuples (e164, risk_level, source_or_notes)
+        - e164: phone number string (any format); will be normalized
+        - risk_level: optional risk level
+        - source_or_notes: optional notes or source; stored as notes
+        returns count of processed rows
+        """
+        count = 0
+        for e164, risk_level, notes in items:
+            try:
+                e164_norm, cc, nn = normalize_phone(e164=e164, country_code=None, national_number=None)
+                self.repo.upsert_report(e164=e164_norm, country_code=cc, national_number=nn, source=None, notes=notes, risk_level=risk_level)
+                count += 1
+            except Exception:
+                continue
+        self.session.commit()
+        return count

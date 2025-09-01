@@ -26,3 +26,41 @@ class UrlRiskService:
         entity = self.repo.upsert_report(full_url=normalized, url_sha256=sha, scheme=scheme, host=host, registrable_domain=registrable, source=source, notes=notes, risk_level=risk_level, phishing_flag=phishing_flag)
         self.session.commit()
         return entity
+
+    def set_is_deleted(self, *, url: str, is_deleted: int) -> bool:
+        _, _, _, _, sha = normalize_url(url)
+        updated = self.repo.set_is_deleted_by_sha(url_sha256=sha, is_deleted=is_deleted)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def set_notes(self, *, url: str, notes: str | None) -> bool:
+        _, _, _, _, sha = normalize_url(url)
+        updated = self.repo.set_notes_by_sha(url_sha256=sha, notes=notes)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def set_risk_level(self, *, url: str, risk_level: int) -> bool:
+        _, _, _, _, sha = normalize_url(url)
+        updated = self.repo.set_risk_level_by_sha(url_sha256=sha, risk_level=risk_level)
+        if updated:
+            self.session.commit()
+        return updated
+
+    def batch_import(self, items: list[tuple[str, int | None, int | None, str | None]]) -> int:
+        """Batch import URLs.
+
+        items: list of tuples (url, risk_level, phishing_flag, notes)
+        returns processed count
+        """
+        count = 0
+        for url, risk_level, phishing_flag, notes in items:
+            try:
+                normalized, scheme, host, registrable, sha = normalize_url(url)
+                self.repo.upsert_report(full_url=normalized, url_sha256=sha, scheme=scheme, host=host, registrable_domain=registrable, source=None, notes=notes, risk_level=risk_level, phishing_flag=phishing_flag)
+                count += 1
+            except Exception:
+                continue
+        self.session.commit()
+        return count
