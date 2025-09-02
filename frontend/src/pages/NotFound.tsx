@@ -6,7 +6,7 @@ const NotFound: React.FC = () => {
     <section className="section container">
       <h2>Page not found</h2>
       <p>The page you are looking for does not exist.</p>
-      <Link to="/" className="btn">Back to Home</Link>
+      <Link to="/" className="btn">Back to ScamHub</Link>
     </section>
   );
 };

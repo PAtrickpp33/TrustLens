@@ -3,9 +3,9 @@ import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import Home from '@/pages/Home';
-import Features from '@/pages/Features';
-import About from '@/pages/About';
+import ScamHub from '@/pages/ScamHub';
+import ScamCheck from '@/pages/ScamCheck';
+import AboutUs from '@/pages/AboutUs';
 import Results from '@/pages/Results';
 import NotFound from '@/pages/NotFound';
 import { ProtectedRoute } from './protected';
@@ -21,9 +21,9 @@ export const router = createBrowserRouter([
     path: '/',
     element: withSuspense(<RootLayout />),
     children: [
-      { index: true, element: <Home /> },
-      { path: 'features', element: <Features /> },
-      { path: 'about', element: <About /> },
+      { index: true, element: <ScamHub /> },
+      { path: 'features', element: <ScamCheck /> },
+      { path: 'about', element: <AboutUs /> },
       {
         path: 'dashboard',
         element: withSuspense(
