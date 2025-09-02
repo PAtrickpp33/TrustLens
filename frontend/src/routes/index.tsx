@@ -11,6 +11,7 @@ import NotFound from '@/pages/NotFound';
 import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
+import ArticlesEditor from '@/pages/ArticlesEditor';
 import { ProtectedRoute } from './protected';
 
 const withSuspense = (element: React.ReactElement) => (
@@ -35,6 +36,8 @@ export const router = createBrowserRouter([
           { path: ':slug', element: <ArticleDetail /> }
         ]
       },
+      // Hidden editor route (no nav link)
+      { path: 'hidden/articles-editor', element: <ArticlesEditor /> },
       {
         path: 'dashboard',
         element: withSuspense(

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { http } from '@/lib/http';
 import { List, Card, Typography } from 'antd';
 
 type ArticleListItem = {
@@ -20,7 +20,7 @@ const Articles: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get('/api/v1/articles');
+        const res = await http.get('/api/v1/articles');
         if (res.data?.success) {
           setItems(res.data.data?.items || []);
           setError(null);

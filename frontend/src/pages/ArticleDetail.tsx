@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { http } from '@/lib/http';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -24,7 +24,7 @@ const ArticleDetail: React.FC = () => {
     if (!slug) return;
     (async () => {
       try {
-        const res = await axios.get(`/api/v1/articles/${slug}`);
+        const res = await http.get(`/api/v1/articles/${slug}`);
         if (res.data?.success) {
           setData(res.data.data);
         } else {
