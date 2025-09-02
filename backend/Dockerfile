@@ -29,7 +29,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    PORT=8000
+    PORT=8001
 
 WORKDIR /app
 
@@ -46,9 +46,9 @@ RUN useradd -m -u 10001 appuser \
 USER appuser
 
 # FastAPI default port
-EXPOSE 8000
+EXPOSE 8001
 
 # Coolify will inject environment variables. If you use a .env file, mount it to /app/.env
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}"]
 
 
