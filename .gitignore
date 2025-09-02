@@ -86,3 +86,6 @@ venv.bak/
 # Other common files
 .DS_Store
 Thumbs.db
+
+# Data
+/data
