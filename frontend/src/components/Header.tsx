@@ -17,9 +17,10 @@ export const Header: React.FC = () => {
         </div>
 
         <nav className="hidden md:flex items-center space-x-8">
-          <NavLink to="/" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamHub</NavLink>
-          <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamCheck</NavLink>
+          <NavLink to="/" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamCheck</NavLink>
+          <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamHub</NavLink>
           <NavLink to="/about" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>About us</NavLink>
+          <NavLink to="/articles" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>Articles</NavLink>
         </nav>
 
         <div className="hidden md:flex items-center">
@@ -37,9 +38,10 @@ export const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <NavLink to="/" className="text-foreground hover:text-primary transition-colors">ScamHub</NavLink>
-            <NavLink to="/features" className="text-foreground hover:text-primary transition-colors">ScamCheck</NavLink>
+            <NavLink to="/" className="text-foreground hover:text-primary transition-colors">ScamCheck</NavLink>
+            <NavLink to="/features" className="text-foreground hover:text-primary transition-colors">ScamHub</NavLink>
             <NavLink to="/about" className="text-foreground hover:text-primary transition-colors">About us</NavLink>
+            <NavLink to="/articles" className="text-foreground hover:text-primary transition-colors">Articles</NavLink>
             <div className="pt-4 border-t">
               <Button type="primary" size="middle" style={{ width: '100%' }}>Get Started</Button>
             </div>

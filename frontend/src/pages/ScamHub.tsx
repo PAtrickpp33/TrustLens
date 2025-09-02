@@ -1,15 +1,15 @@
 import React from 'react';
-import { Hero } from '@/components/Hero';
-import { Features } from '@/components/Features';
-import { About } from '@/components/About';
 
 const ScamHub: React.FC = () => {
   return (
-    <>
-      <Hero />
-      <Features />
-      <About />
-    </>
+    <section className="section container">
+      <h2>ScamHub</h2>
+      <ul className="feature-list">
+        <li>Automated policy checks</li>
+        <li>Security scoring and benchmarks</li>
+        <li>Attribution and transparency reports</li>
+      </ul>
+    </section>
   );
 };
 

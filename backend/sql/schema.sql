@@ -82,3 +82,19 @@ CREATE TABLE `risk_url` (
   KEY `idx_registrable_domain` (`registrable_domain`),
   KEY `idx_risk_level` (`risk_level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='URL risk registry';
+
+-- Table: articles
+DROP TABLE IF EXISTS `articles`;
+CREATE TABLE `articles` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+  `slug` VARCHAR(160) NOT NULL COMMENT 'URL-safe unique slug',
+  `title` VARCHAR(200) NOT NULL COMMENT 'Article title',
+  `summary` VARCHAR(512) NULL DEFAULT NULL COMMENT 'Short summary',
+  `content_md` MEDIUMTEXT NOT NULL COMMENT 'Markdown content',
+  `is_published` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '0-draft,1-published',
+  `gmt_create` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
+  `gmt_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_slug` (`slug`),
+  KEY `idx_published` (`is_published`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Articles/News in Markdown';

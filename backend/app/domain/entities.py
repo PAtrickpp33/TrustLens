@@ -46,3 +46,15 @@ class UrlRisk:
     report_count: int
     last_reported_at: datetime | None
     notes: str | None
+
+
+@dataclass
+class ArticleEntity:
+    id: int | None
+    slug: str
+    title: str
+    summary: str | None
+    content_md: str
+    is_published: int
+    gmt_create: datetime | None
+    gmt_modified: datetime | None

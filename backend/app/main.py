@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.api.routes_mobile import router as mobile_router
 from app.api.routes_email import router as email_router
 from app.api.routes_url import router as url_router
+from app.api.routes_articles import router as articles_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -33,6 +34,7 @@ app.add_middleware(
 app.include_router(mobile_router, prefix="/api/v1", tags=["mobile"])
 app.include_router(email_router, prefix="/api/v1", tags=["email"])
 app.include_router(url_router, prefix="/api/v1", tags=["url"])
+app.include_router(articles_router, prefix="/api/v1", tags=["articles"])
 
 
 # Global error handling to unify response format

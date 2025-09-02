@@ -8,6 +8,9 @@ import ScamCheck from '@/pages/ScamCheck';
 import AboutUs from '@/pages/AboutUs';
 import Results from '@/pages/Results';
 import NotFound from '@/pages/NotFound';
+import Articles from '@/pages/Articles';
+import ArticleDetail from '@/pages/ArticleDetail';
+import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import { ProtectedRoute } from './protected';
 
 const withSuspense = (element: React.ReactElement) => (
@@ -21,9 +24,17 @@ export const router = createBrowserRouter([
     path: '/',
     element: withSuspense(<RootLayout />),
     children: [
-      { index: true, element: <ScamHub /> },
-      { path: 'features', element: <ScamCheck /> },
+      { index: true, element: <ScamCheck /> },
+      { path: 'features', element: <ScamHub /> },
       { path: 'about', element: <AboutUs /> },
+      {
+        path: 'articles',
+        element: <ArticlesLayout />,
+        children: [
+          { index: true, element: <Articles /> },
+          { path: ':slug', element: <ArticleDetail /> }
+        ]
+      },
       {
         path: 'dashboard',
         element: withSuspense(

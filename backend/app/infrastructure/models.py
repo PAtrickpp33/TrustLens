@@ -83,3 +83,17 @@ class RiskUrl(Base):
     is_deleted: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     gmt_create: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     gmt_modified: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Article(Base):
+    __tablename__ = "articles"
+
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
+    slug: Mapped[str] = mapped_column(String(160), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    summary: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    content_md: Mapped[str] = mapped_column(String().with_variant(String, "sqlite"), nullable=False)
+    is_published: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    gmt_create: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    gmt_modified: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
