@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 
@@ -32,3 +33,16 @@ app.add_middleware(
 app.include_router(mobile_router, prefix="/api/v1", tags=["mobile"])
 app.include_router(email_router, prefix="/api/v1", tags=["email"])
 app.include_router(url_router, prefix="/api/v1", tags=["url"])
+
+
+# Global error handling to unify response format
+@app.exception_handler(ValueError)
+async def handle_value_error(request: Request, exc: ValueError):
+    return JSONResponse(status_code=400, content={"success": False, "error": str(exc)})
+
+
+@app.exception_handler(HTTPException)
+async def handle_http_exception(request: Request, exc: HTTPException):
+    # Preserve status code but unify body
+    detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    return JSONResponse(status_code=exc.status_code, content={"success": False, "error": detail})
