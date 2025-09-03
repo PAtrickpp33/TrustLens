@@ -79,6 +79,7 @@ env.bak/
 venv.bak/
 *venv
 *.venv
+**.env
 
 # Database
 *.db
