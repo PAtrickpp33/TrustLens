@@ -89,6 +89,5 @@ venv.bak/
 Thumbs.db
 
 # Data
-**/data/*/*.csv
-**/data/*/*.parquet
-**/data/email*/
+**.csv
+**.parquet
