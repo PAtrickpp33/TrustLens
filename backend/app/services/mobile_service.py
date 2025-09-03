@@ -48,22 +48,23 @@ class MobileRiskService:
             self.session.commit()
         return updated
 
-    def batch_import(self, items: list[tuple[str, int | None, str | None]]) -> int:
+    def batch_import(self, items: list[tuple[str, int | None, str | None]]) -> dict:
         """Batch import mobiles.
 
-        items: list of tuples (e164, risk_level, source_or_notes)
-        - e164: phone number string (any format); will be normalized
-        - risk_level: optional risk level
-        - source_or_notes: optional notes or source; stored as notes
-        returns count of processed rows
+        items: list of tuples (e164, risk_level, notes)
+        returns summary dict
         """
-        count = 0
+        summary = {"total": 0, "succeeded": 0, "failed": 0, "errors": []}
         for e164, risk_level, notes in items:
+            summary["total"] += 1
             try:
                 e164_norm, cc, nn = normalize_phone(e164=e164, country_code=None, national_number=None)
                 self.repo.upsert_report(e164=e164_norm, country_code=cc, national_number=nn, source=None, notes=notes, risk_level=risk_level)
-                count += 1
-            except Exception:
+                summary["succeeded"] += 1
+            except Exception as e:
+                summary["failed"] += 1
+                if len(summary["errors"]) < 20:
+                    summary["errors"].append({"input": e164, "error": str(e)})
                 continue
         self.session.commit()
-        return count
+        return summary

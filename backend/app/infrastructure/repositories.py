@@ -6,9 +6,9 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domain.entities import MobileRisk, EmailRisk, UrlRisk
-from app.domain.repositories import MobileRiskRepository, EmailRiskRepository, UrlRiskRepository
-from app.infrastructure.models import RiskMobile, RiskEmail, RiskUrl
+from app.domain.entities import MobileRisk, EmailRisk, UrlRisk, ArticleEntity
+from app.domain.repositories import MobileRiskRepository, EmailRiskRepository, UrlRiskRepository, ArticleRepository
+from app.infrastructure.models import RiskMobile, RiskEmail, RiskUrl, Article
 
 
 class SqlAlchemyMobileRiskRepository(MobileRiskRepository):
@@ -219,6 +219,64 @@ class SqlAlchemyUrlRiskRepository(UrlRiskRepository):
             report_count=row.report_count,
             last_reported_at=row.last_reported_at,
             notes=row.notes,
+        )
+
+
+class SqlAlchemyArticleRepository(ArticleRepository):
+    def __init__(self, session: Session):
+        self.session = session
+
+    def list_published(self) -> list[ArticleEntity]:
+        rows = self.session.query(Article).filter(Article.is_published == 1).order_by(Article.gmt_create.desc()).all()
+        return [
+            ArticleEntity(
+                id=row.id,
+                slug=row.slug,
+                title=row.title,
+                summary=row.summary,
+                content_md=row.content_md,
+                is_published=row.is_published,
+                gmt_create=row.gmt_create,
+                gmt_modified=row.gmt_modified,
+            )
+            for row in rows
+        ]
+
+    def get_by_slug(self, slug: str) -> Optional[ArticleEntity]:
+        row = self.session.query(Article).filter(Article.slug == slug, Article.is_published == 1).one_or_none()
+        if not row:
+            return None
+        return ArticleEntity(
+            id=row.id,
+            slug=row.slug,
+            title=row.title,
+            summary=row.summary,
+            content_md=row.content_md,
+            is_published=row.is_published,
+            gmt_create=row.gmt_create,
+            gmt_modified=row.gmt_modified,
+        )
+
+    def create_or_update(self, *, slug: str, title: str, summary: Optional[str], content_md: str, is_published: int) -> ArticleEntity:
+        row = self.session.query(Article).filter(Article.slug == slug).one_or_none()
+        if row is None:
+            row = Article(slug=slug, title=title, summary=summary, content_md=content_md, is_published=is_published)
+            self.session.add(row)
+        else:
+            row.title = title
+            row.summary = summary
+            row.content_md = content_md
+            row.is_published = is_published
+        self.session.flush()
+        return ArticleEntity(
+            id=row.id,
+            slug=row.slug,
+            title=row.title,
+            summary=row.summary,
+            content_md=row.content_md,
+            is_published=row.is_published,
+            gmt_create=row.gmt_create,
+            gmt_modified=row.gmt_modified,
         )
 
     def set_is_deleted_by_sha(self, *, url_sha256: str, is_deleted: int) -> bool:

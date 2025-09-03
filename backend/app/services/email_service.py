@@ -48,19 +48,23 @@ class EmailRiskService:
             self.session.commit()
         return updated
 
-    def batch_import(self, items: list[tuple[str, int | None, str | None, int | None, int | None]]) -> int:
+    def batch_import(self, items: list[tuple[str, int | None, str | None, int | None, int | None]]) -> dict:
         """Batch import emails.
 
         items: list of tuples (address, risk_level, notes, mx_valid, disposable)
-        returns processed count
+        returns summary dict
         """
-        count = 0
+        summary = {"total": 0, "succeeded": 0, "failed": 0, "errors": []}
         for address, risk_level, notes, mx_valid, disposable in items:
+            summary["total"] += 1
             try:
                 local, domain, addr = normalize_email(address)
                 self.repo.upsert_report(address=addr, local_part=local, domain=domain, source=None, notes=notes, risk_level=risk_level, mx_valid=mx_valid, disposable=disposable)
-                count += 1
-            except Exception:
+                summary["succeeded"] += 1
+            except Exception as e:
+                summary["failed"] += 1
+                if len(summary["errors"]) < 20:
+                    summary["errors"].append({"input": address, "error": str(e)})
                 continue
         self.session.commit()
-        return count
+        return summary

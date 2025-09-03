@@ -15,7 +15,7 @@ export function Features() {
     <section id="features" className="py-20 bg-muted/50">
       <div className="container mx-auto px-4">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold">Powerful Security Features</h2>
+          <h2 className="text-3xl lg:text-5xl font-bold">Powerful Security ScamCheck</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Comprehensive protection against online threats with advanced detection capabilities 
             and real-time security intelligence.

@@ -48,19 +48,23 @@ class UrlRiskService:
             self.session.commit()
         return updated
 
-    def batch_import(self, items: list[tuple[str, int | None, int | None, str | None]]) -> int:
+    def batch_import(self, items: list[tuple[str, int | None, int | None, str | None]]) -> dict:
         """Batch import URLs.
 
         items: list of tuples (url, risk_level, phishing_flag, notes)
-        returns processed count
+        returns summary dict
         """
-        count = 0
+        summary = {"total": 0, "succeeded": 0, "failed": 0, "errors": []}
         for url, risk_level, phishing_flag, notes in items:
+            summary["total"] += 1
             try:
                 normalized, scheme, host, registrable, sha = normalize_url(url)
                 self.repo.upsert_report(full_url=normalized, url_sha256=sha, scheme=scheme, host=host, registrable_domain=registrable, source=None, notes=notes, risk_level=risk_level, phishing_flag=phishing_flag)
-                count += 1
-            except Exception:
+                summary["succeeded"] += 1
+            except Exception as e:
+                summary["failed"] += 1
+                if len(summary["errors"]) < 20:
+                    summary["errors"].append({"input": url, "error": str(e)})
                 continue
         self.session.commit()
-        return count
+        return summary

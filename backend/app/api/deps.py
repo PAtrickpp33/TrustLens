@@ -5,6 +5,7 @@ from app.infrastructure.db import get_session
 from app.services.mobile_service import MobileRiskService
 from app.services.email_service import EmailRiskService
 from app.services.url_service import UrlRiskService
+from app.services import ArticleService
 
 
 def get_mobile_service(session: Session = Depends(get_session)) -> MobileRiskService:
@@ -17,3 +18,7 @@ def get_email_service(session: Session = Depends(get_session)) -> EmailRiskServi
 
 def get_url_service(session: Session = Depends(get_session)) -> UrlRiskService:
     return UrlRiskService(session)
+
+
+def get_article_service(session: Session = Depends(get_session)) -> ArticleService:
+    return ArticleService(session)
