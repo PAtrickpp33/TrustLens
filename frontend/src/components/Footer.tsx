@@ -10,10 +10,18 @@ export const Footer: React.FC = () => {
         <div className="grid lg:grid-cols-4 gap-8 mb-12">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">L</span>
+              {/* Richard: Placed TrustLens logo from public/logo */}
+              <div
+                className="w-8 h-8 rounded-2xl overflow-hidden border border-foreground/10 ring-1 ring-black/5 bg-card"
+                aria-label="TrustLens"
+              >
+                <img
+                  src="/logo/trustlens_logo.jpeg"
+                  alt="TrustLens logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <span className="font-bold text-xl">Logo</span>
+              <span className="font-bold text-xl">TrustLens</span>
             </div>
             <p className="text-muted-foreground">
               Building amazing digital experiences for the modern web.
