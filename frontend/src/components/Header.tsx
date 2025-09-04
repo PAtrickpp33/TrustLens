@@ -26,7 +26,7 @@ export const Header: React.FC = () => {
 
         <nav className="hidden md:flex items-center space-x-8">
           <NavLink to="/" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamCheck</NavLink>
-          <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamHub</NavLink>
+          <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>Quiz</NavLink>
           <NavLink to="/about" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>About us</NavLink>
         </nav>
 
@@ -42,7 +42,7 @@ export const Header: React.FC = () => {
         <div className="md:hidden border-t bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             <NavLink to="/" className="text-foreground hover:text-primary transition-colors">ScamCheck</NavLink>
-            <NavLink to="/features" className="text-foreground hover:text-primary transition-colors">ScamHub</NavLink>
+            <NavLink to="/features" className="text-foreground hover:text-primary transition-colors">Quiz</NavLink>
             <NavLink to="/about" className="text-foreground hover:text-primary transition-colors">About us</NavLink>
             
           </nav>

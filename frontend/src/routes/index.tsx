@@ -3,7 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import ScamHub from '@/pages/ScamHub';
+import Quiz from '@/pages/Quiz';
 import ScamCheck from '@/pages/ScamCheck';
 import AboutUs from '@/pages/AboutUs';
 import Results from '@/pages/Results';
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ScamCheck /> },
-      { path: 'features', element: <ScamHub /> },
+      { path: 'features', element: <Quiz /> },
       { path: 'about', element: <AboutUs /> },
       {
         path: 'articles',

@@ -92,6 +92,9 @@ jspm_packages/
 .cache/
 public
 
+!public/images
+!public/images/**
+
 # Storybook build outputs
 .out
 .storybook-out
