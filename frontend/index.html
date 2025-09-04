@@ -1,14 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TrustLens</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TrustLens — Safer clicks. Smarter decisions.</title>
+    <meta name="description" content="TrustLens helps people recognise scams, understand online risks, and act with confidence through clear explanations, practical education, and transparent checks." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="TrustLens — Safer clicks. Smarter decisions." />
+    <meta property="og:description" content="Recognise scams, understand online risks, act with confidence." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TrustLens — Safer clicks. Smarter decisions." />
+    <meta name="twitter:description" content="Recognise scams, understand online risks, act with confidence." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Icons / PWA (optional files; add if you have them) -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Prevent dark-mode flash before React mounts -->
+    <script>
+      (function () {
+        try {
+          const saved = localStorage.getItem('theme');
+          const system = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const dark = saved ? saved === 'dark' : system;
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (_) {}
+      })();
+    </script>
   </head>
-  <body>
+  <body class="h-full antialiased bg-background text-foreground">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <noscript><strong>TrustLens requires JavaScript to run.</strong></noscript>
   </body>
-  </html>
-
-
+</html>
