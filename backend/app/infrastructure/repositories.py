@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import select
@@ -220,7 +220,85 @@ class SqlAlchemyUrlRiskRepository(UrlRiskRepository):
             last_reported_at=row.last_reported_at,
             notes=row.notes,
         )
-
+    
+    # Richard: Main changes concern implementation below of abstract methods from UrlRiskRepository
+    # Richard: Methods should be consistent with calls from url_service.py
+    def set_is_deleted_by_sha(self, *, url_sha256: str, is_deleted: int) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.is_deleted = 1 if is_deleted else 0
+        self.session.flush()
+        return True
+    
+    def set_notes_by_sha(self, *, url_sha256: str, notes: str | None) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256, RiskUrl.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.notes = notes
+        self.session.flush()
+        return True
+    
+    def set_risk_level_by_sha(self, *, url_sha256: str, risk_level: int) -> bool:
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256, RiskUrl.is_deleted == 0)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        if row is None:
+            return False
+        row.risk_level = risk_level
+        self.session.flush()
+        return True
+        
+    def upsert_report(self, *, full_url: str, url_sha256: str, scheme: str, host: str, registrable_domain: Optional[str], source: Optional[str], notes: Optional[str], risk_level: Optional[int], phishing_flag: Optional[int]) -> UrlRisk:
+        # Richard: Used url_sha256 as main identifier rather than full_url
+        stmt = select(RiskUrl).where(RiskUrl.url_sha256 == url_sha256)
+        row = self.session.execute(stmt).scalar_one_or_none()
+        now = datetime.now(timezone.utc)
+        if row is None:
+            row = RiskUrl(
+                scheme=scheme,
+                host=host,
+                registrable_domain=registrable_domain,
+                full_url=full_url,
+                url_sha256=url_sha256,
+                risk_level=risk_level or 0,
+                phishing_flag=phishing_flag or 0,
+                source=source,
+                report_count=1,
+                last_reported_at=now,
+                notes=notes,
+                is_deleted=0,
+            )
+            self.session.add(row)
+        else:
+            # Richard: No need to update scheme, host, full_url, and registrable_domain for stability & efficiency
+            row.report_count = (row.report_count or 0) + 1
+            row.last_reported_at = now
+            if risk_level:
+                row.risk_level = risk_level
+            if phishing_flag:
+                row.phishing_flag = phishing_flag
+            if source:
+                row.source = source
+            if notes:
+                row.notes = notes
+        self.session.flush()
+        return RiskUrl(
+            id=row.id,
+            scheme=row.scheme,
+            host=row.host,
+            registrable_domain=row.registrable_domain,
+            full_url=row.full_url,
+            url_sha256=row.url_sha256,
+            risk_level=row.risk_level,
+            phishing_flag=row.phishing_flag,
+            source=row.source,
+            report_count=row.report_count,
+            last_reported_at=row.last_reported_at,
+            notes=row.notes,
+        )
+        
 
 class SqlAlchemyArticleRepository(ArticleRepository):
     def __init__(self, session: Session):
