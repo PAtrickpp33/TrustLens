@@ -1,6 +1,6 @@
 import React from "react";
 
-/* Reusable Section wrapper */
+/* ---------- Reusable Section ---------- */
 type SectionProps = React.PropsWithChildren<{
   id?: string;
   className?: string;
@@ -12,12 +12,33 @@ const Section: React.FC<SectionProps> = ({ id, className, title, subtitle, child
   <section id={id} className={`max-w-6xl mx-auto px-6 md:px-10 ${className || ""}`}>
     {(title || subtitle) && (
       <header className="mb-8 text-center">
-        {subtitle && <p className="text-xs tracking-[0.2em] uppercase text-slate-500">{subtitle}</p>}
-        {title && <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-slate-900">{title}</h2>}
+        {subtitle && (
+          <p className="text-xs tracking-[0.2em] uppercase text-slate-500">{subtitle}</p>
+        )}
+        {title && (
+          <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+            {title}
+          </h2>
+        )}
       </header>
     )}
     {children}
   </section>
+);
+
+/* ---------- Subtitle Divider (pill between two lines) ---------- */
+const SubtitleDivider: React.FC<{ text: string; className?: string }> = ({ text, className }) => (
+  <div className={`relative ${className ?? "my-12"}`}>
+    <hr className="border-slate-200" />
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="px-3 py-1 rounded-full bg-white dark:bg-slate-900 text-[11px] tracking-[0.2em] uppercase text-slate-500 shadow-sm">
+        {text}
+      </span>
+    </div>
+    <div className="mt-6">
+      <hr className="border-slate-200" />
+    </div>
+  </div>
 );
 
 const About: React.FC = () => {
@@ -37,18 +58,20 @@ const About: React.FC = () => {
 
           <h1 className="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
             About{" "}
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent">TrustLens</span>
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-500 bg-clip-text text-transparent">
+              TrustLens
+            </span>
           </h1>
 
           <p className="mx-auto mt-4 max-w-3xl text-lg text-slate-700">
-            We help people recognise scams, understand online risks, and act with confidence — through clear explanations,
-            practical education, and transparent checks.
+            We help people recognise scams, understand online risks, and act with confidence — through clear
+            explanations, practical education, and transparent checks.
           </p>
-          {/* hero buttons removed per your request */}
+          {/* hero buttons intentionally removed */}
         </div>
       </Section>
 
-      {/* WHAT WE DO — colorful, centered, icons always visible */}
+      {/* WHAT WE DO — colorful, centered, purge-safe icons */}
       <Section title="What We Do" className="pb-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 text-center">
           {[
@@ -92,7 +115,7 @@ const About: React.FC = () => {
               className="group relative rounded-2xl bg-white/90 backdrop-blur shadow-md ring-1 ring-slate-200 hover:shadow-xl transition hover:-translate-y-1"
             >
               <div className="flex justify-center pt-6">
-                {/* inline gradient ensures purge-safe, icon always visible */}
+                {/* inline gradient avoids purge issues; icon stays visible */}
                 <div
                   className="h-14 w-14 rounded-2xl grid place-items-center text-white shadow-lg"
                   style={{ background: c.gradient }}
@@ -110,8 +133,13 @@ const About: React.FC = () => {
         </div>
       </Section>
 
-      {/* TIMELINE */}
-      <Section title="Our Story" subtitle="From problem to purpose" className="pt-2 pb-4">
+      {/* OUR STORY — divider with extra breathing room */}
+      <Section className="pt-4 pb-8">
+        <SubtitleDivider text="From problem to purpose" className="my-14" />
+        <h2 className="text-center text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-8">
+          Our Story
+        </h2>
+
         <div className="relative mx-auto max-w-3xl">
           <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent md:left-1/2" />
           {[
