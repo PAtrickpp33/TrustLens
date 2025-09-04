@@ -20,7 +20,8 @@ export const Header: React.FC = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="font-bold text-xl">TrustLens</span>
+          {/* Richard: Changed font color to dark blue */}
+          <span className="font-bold text-xl text-[#123972]">TrustLens</span>
         </div>
 
         <nav className="hidden md:flex items-center space-x-8">
@@ -28,8 +29,6 @@ export const Header: React.FC = () => {
           <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamHub</NavLink>
           <NavLink to="/about" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>About us</NavLink>
         </nav>
-
-        
 
         <button 
           className="md:hidden"

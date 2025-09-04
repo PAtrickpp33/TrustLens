@@ -20,7 +20,8 @@ export const Footer: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="font-bold text-xl">TrustLens</span>
+              {/* Richard: Changed font color to dark blue */}
+              <span className="font-bold text-xl text-[#123972]">TrustLens</span>
             </div>
             <p className="text-muted-foreground">
               Building amazing digital experiences for the modern web.
