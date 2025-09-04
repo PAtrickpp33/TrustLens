@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getRiskUi, RiskKind } from "@/lib/riskUi";
+import { getRiskUi } from "@/lib/riskUi";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 
 type Props =
