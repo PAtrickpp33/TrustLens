@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
@@ -20,12 +19,9 @@ export const Header: React.FC = () => {
           <NavLink to="/" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamCheck</NavLink>
           <NavLink to="/features" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>ScamHub</NavLink>
           <NavLink to="/about" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>About us</NavLink>
-          <NavLink to="/articles" className={({isActive}) => isActive ? "text-primary" : "text-foreground hover:text-primary transition-colors"}>Articles</NavLink>
         </nav>
 
-        <div className="hidden md:flex items-center">
-          <Button type="primary" size="middle">Get Started</Button>
-        </div>
+        
 
         <button 
           className="md:hidden"
@@ -41,10 +37,7 @@ export const Header: React.FC = () => {
             <NavLink to="/" className="text-foreground hover:text-primary transition-colors">ScamCheck</NavLink>
             <NavLink to="/features" className="text-foreground hover:text-primary transition-colors">ScamHub</NavLink>
             <NavLink to="/about" className="text-foreground hover:text-primary transition-colors">About us</NavLink>
-            <NavLink to="/articles" className="text-foreground hover:text-primary transition-colors">Articles</NavLink>
-            <div className="pt-4 border-t">
-              <Button type="primary" size="middle" style={{ width: '100%' }}>Get Started</Button>
-            </div>
+            
           </nav>
         </div>
       )}
