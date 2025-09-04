@@ -12,7 +12,7 @@ import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
-import { ProtectedRoute } from './protected';
+import { ProtectedRoute, SiteGate } from './protected';
 
 const withSuspense = (element: React.ReactElement) => (
   <Suspense fallback={<LoadingSpinner />}>
@@ -23,7 +23,11 @@ const withSuspense = (element: React.ReactElement) => (
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: withSuspense(<RootLayout />),
+    element: withSuspense(
+      <SiteGate>
+        <RootLayout />
+      </SiteGate>
+    ),
     children: [
       { index: true, element: <ScamCheck /> },
       { path: 'features', element: <ScamHub /> },
@@ -51,7 +55,11 @@ export const router = createBrowserRouter([
       }
     ]
   },
-  { path: '*', element: <NotFound /> }
+  { path: '*', element: (
+    <SiteGate>
+      <NotFound />
+    </SiteGate>
+  ) }
 ]);
 
 

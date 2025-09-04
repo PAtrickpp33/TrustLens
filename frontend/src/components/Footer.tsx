@@ -1,5 +1,4 @@
 import { Button } from "antd";
-import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
 import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 
@@ -23,17 +22,6 @@ export const Footer: React.FC = () => {
               <Button type="text" size="small" icon={<Github className="h-4 w-4" />} />
               <Button type="text" size="small" icon={<Linkedin className="h-4 w-4" />} />
               <Button type="text" size="small" icon={<Mail className="h-4 w-4" />} />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold">Stay Updated</h4>
-            <p className="text-muted-foreground text-sm">
-              Subscribe to our newsletter for the latest updates and features.
-            </p>
-            <div className="flex space-x-2">
-              <Input placeholder="Enter your email" />
-              <Button type="primary" size="middle">Subscribe</Button>
             </div>
           </div>
         </div>
