@@ -39,7 +39,6 @@ const Quiz: React.FC = () => {
 
   const total = prepared.length;
   const q = prepared[idx];
-  const progressPct = total ? Math.round((idx / total) * 100) : 0;
 
   /* styles that will not be overridden */
   const wrap: React.CSSProperties = { maxWidth: 880, margin: "2rem auto", padding: "0 1rem" };
