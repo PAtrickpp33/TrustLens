@@ -6,17 +6,9 @@ function resolveApiBase(): string {
   let base = configured;
 
   if (typeof window !== "undefined") {
-    const pageProtocol = window.location.protocol; // "http:" or "https:"
-
-    // If not configured, default to current origin so relative path works behind same host
-    if (!base) {
-      base = window.location.origin;
-    }
-
-    // If page is https but API is configured as http, upgrade to https to avoid mixed content
-    if (pageProtocol === "https:" && base.startsWith("http://")) {
-      base = "https://" + base.slice("http://".length);
-    }
+    // If not configured, return empty string so requests use same-origin relative path.
+    // This relies on a reverse proxy (prod) or Vite dev proxy to forward /api to backend.
+    if (!base) return "";
   }
 
   return base.replace(/\/$/, "");
