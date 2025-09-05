@@ -1,5 +1,20 @@
 // Small typed client for your FastAPI
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+// Robust base URL resolution to avoid mixed-content issues in browsers
+import { env } from './env';
+function resolveApiBase(): string {
+  const configured = (env.apiBaseUrl ?? "").trim();
+  let base = configured;
+
+  if (typeof window !== "undefined") {
+    // If not configured, return empty string so requests use same-origin relative path.
+    // This relies on a reverse proxy (prod) or Vite dev proxy to forward /api to backend.
+    if (!base) return "";
+  }
+
+  return base.replace(/\/$/, "");
+}
+
+export const API_BASE = resolveApiBase();
 
 type ApiResponse<T> = {
   success: boolean;
