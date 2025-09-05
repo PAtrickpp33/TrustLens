@@ -43,7 +43,7 @@ export const URL_RISK_UI: Record<RiskLevel, RiskVisual> = {
     ],
   },
   2: {
-    label: "Moderately Risky",
+    label: "Suspicious",
     ...palette.amber,
     note: "Some signals suggest caution (e.g., low reputation, recent domain).",
     tips: [
@@ -77,7 +77,7 @@ export const EMAIL_RISK_UI: Record<RiskLevel, RiskVisual> = {
     ],
   },
   1: {
-    label: "Likely Legitimate",
+    label: "Safe",
     ...palette.green,
     note: "MX and reputation look normal for this address.",
     tips: [
@@ -97,7 +97,7 @@ export const EMAIL_RISK_UI: Record<RiskLevel, RiskVisual> = {
     ],
   },
   3: {
-    label: "Malicious",
+    label: "Unsafe",
     ...palette.red,
     note: "High-risk indicators (phishing or spoofing patterns).",
     tips: [
@@ -121,7 +121,7 @@ export const MOBILE_RISK_UI: Record<RiskLevel, RiskVisual> = {
     ],
   },
   1: {
-    label: "Low Risk",
+    label: "Safe",
     ...palette.green,
     note: "No scam patterns associated with this number.",
     tips: [
@@ -141,7 +141,7 @@ export const MOBILE_RISK_UI: Record<RiskLevel, RiskVisual> = {
     ],
   },
   3: {
-    label: "High Risk",
+    label: "Unsafe",
     ...palette.red,
     note: "Strong signals of scam/spam activity from reports or patterns.",
     tips: [
