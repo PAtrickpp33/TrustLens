@@ -1,5 +1,28 @@
 // Small typed client for your FastAPI
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+// Robust base URL resolution to avoid mixed-content issues in browsers
+import { env } from './env';
+function resolveApiBase(): string {
+  const configured = (env.apiBaseUrl ?? "").trim();
+  let base = configured;
+
+  if (typeof window !== "undefined") {
+    const pageProtocol = window.location.protocol; // "http:" or "https:"
+
+    // If not configured, default to current origin so relative path works behind same host
+    if (!base) {
+      base = window.location.origin;
+    }
+
+    // If page is https but API is configured as http, upgrade to https to avoid mixed content
+    if (pageProtocol === "https:" && base.startsWith("http://")) {
+      base = "https://" + base.slice("http://".length);
+    }
+  }
+
+  return base.replace(/\/$/, "");
+}
+
+export const API_BASE = resolveApiBase();
 
 type ApiResponse<T> = {
   success: boolean;
