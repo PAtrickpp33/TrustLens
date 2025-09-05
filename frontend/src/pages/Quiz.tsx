@@ -96,7 +96,7 @@ const Quiz: React.FC = () => {
           <div style={{ marginBottom: 8 }}><span style={pill}>Score {score} / {total}</span></div>
           <p style={{ marginBottom: 16 }}>{msg}</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            <a href="/features" style={{ border: "1px solid #e5e7eb", padding: "8px 14px", borderRadius: 10, textDecoration: "none" }}>Back to ScamCheck</a>
+            <a href="/" style={{ border: "1px solid #e5e7eb", padding: "8px 14px", borderRadius: 10, textDecoration: "none" }}>Back to ScamCheck</a>
             <button onClick={start} style={{ border: "1px solid #e5e7eb", padding: "8px 14px", borderRadius: 10 }}>Try again</button>
           </div>
         </section>
