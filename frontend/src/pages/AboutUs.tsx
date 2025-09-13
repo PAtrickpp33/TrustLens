@@ -107,7 +107,7 @@ export default function AboutUs() {
         What We Do
       </h2>
 
-      <div style={grid(3, 18, 280)}>
+      <div style={grid(18, 280)}>
         <GradientCard gradient={GRADS.blueCyan} icon="🛡️" title="Risk Checks"
           body="Quick checks for URLs, emails, and phone numbers with plain-language explanations." />
         <GradientCard gradient={GRADS.indigoBlue} icon="📘" title="Education Hub"
@@ -117,7 +117,7 @@ export default function AboutUs() {
       </div>
 
       {/* MISSION + HOW */}
-      <div style={grid(2, 18, 320, "2.25rem")}>
+      <div style={grid(18, 320, "2.25rem")}>
         <PanelColored title="Our Mission" bar={GRADS.blueCyan}>
           <p style={{ marginTop: 0, marginBottom: 12 }}>
             Empower every user — regardless of technical background — to make informed, confident choices when
@@ -145,7 +145,7 @@ export default function AboutUs() {
         Governance & Policies
       </h2>
 
-      <div style={grid(3, 18, 280)}>
+      <div style={grid(18, 280)}>
         <GradientCard gradient={GRADS.blueCyan} icon="🔒" title="Privacy by Design"
           body={<ul style={ul()}>
             <li>Minimal data collection; no selling of personal data.</li>
@@ -325,7 +325,7 @@ function Accordion({ title, children }: React.PropsWithChildren<{ title: string 
 }
 
 /* ---------------- small style helpers ---------------- */
-function grid(cols: number, gap = 16, min = 320, mt = "1rem"): React.CSSProperties {
+function grid(gap = 16, min = 320, mt = "1rem"): React.CSSProperties {
   return {
     display: "grid",
     gridTemplateColumns: `repeat(auto-fit, minmax(${min}px, 1fr))`,
