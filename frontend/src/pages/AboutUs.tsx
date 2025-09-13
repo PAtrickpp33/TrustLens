@@ -180,19 +180,6 @@ function FeatureCard({
   );
 }
 
-function Panel({
-  title,
-  bar,
-  children,
-}: React.PropsWithChildren<{ title: string; bar: string }>) {
-  return (
-    <div className="relative rounded-2xl border bg-white/80 p-6 shadow-sm">
-      <div className={`absolute left-0 top-0 h-1 w-full rounded-t-2xl bg-gradient-to-r ${bar}`} />
-      <h3 className="mb-2 font-semibold text-blue-800">{title}</h3>
-      <div className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">{children}</div>
-    </div>
-  );
-}
 
 function PolicyCard({
   icon,
