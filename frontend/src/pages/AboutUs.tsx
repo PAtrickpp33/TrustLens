@@ -53,32 +53,10 @@ const AboutUs: React.FC = () => {
         </div>
       </div>
 
-      {/* Team */}
-      <h2 className="text-2xl font-semibold text-center mb-6">Meet The Team</h2>
-      <p className="text-center text-sm text-muted-foreground mb-6">
-        We are a cross-disciplinary group combining product, data, AI, and engineering.
-      </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {team.map((m) => (
-          <div key={m.name} className="rounded-xl border p-4 text-center">
-            <div className="mx-auto h-32 w-32 rounded-lg overflow-hidden mb-3 bg-muted">
-              <img
-                src={m.image}
-                alt={m.name}
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    "https://via.placeholder.com/128x128.png?text=TL";
-                }}
-              />
-            </div>
-            <div className="font-medium">{m.name}</div>
-            <div className="text-xs text-muted-foreground">{m.degree}</div>
-            <div className="text-sm mt-1">{m.role}</div>
-          </div>
-        ))}
-      </div>
+      
+
+
     </section>
   );
 };
