@@ -13,7 +13,9 @@ import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
 import { ProtectedRoute, SiteGate } from './protected';
+import LandingDashboard from '@/pages/LandingDashboard';   
 
+// Suspense wrapper
 const withSuspense = (element: React.ReactElement) => (
   <Suspense fallback={<LoadingSpinner />}>
     {element}
@@ -32,6 +34,7 @@ export const router = createBrowserRouter([
       { index: true, element: <ScamCheck /> },
       { path: 'features', element: <Quiz /> },
       { path: 'about', element: <AboutUs /> },
+      { path: 'landing', element: <LandingDashboard /> },   
       {
         path: 'articles',
         element: <ArticlesLayout />,
@@ -61,5 +64,3 @@ export const router = createBrowserRouter([
     </SiteGate>
   ) }
 ]);
-
-
