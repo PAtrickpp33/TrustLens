@@ -31,7 +31,7 @@ export default function LandingDashboard() {
 
   // load CSV
   useEffect(() => {
-    Papa.parse("/scam_data.csv", {
+    Papa.parse<Row>("/scam_data.csv", {
       download: true,
       header: true,
       dynamicTyping: true,
