@@ -1,18 +1,15 @@
-import { Button } from "antd";
-import { Input } from "./ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Shield, Globe, Mail, Phone, Search, Info } from "lucide-react";
 import { useState, useCallback, useMemo } from "react";
+import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
+import { Shield, Globe, Mail, Phone, Search } from "lucide-react";
 import RiskCard from "./riskCard";
 import { checkUrl, checkEmail, checkMobile } from "@/lib/api";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 import { parseAuPhone } from "@/lib/phone";
+import "./Hero.css";
 
-type Tab = "url" | "email" | "mobile"
+type Tab = "url" | "email" | "mobile";
 
 export function Hero() {
-  // const [inputValue, setInputValue] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("url");
 
   // inputs
@@ -33,6 +30,7 @@ export function Hero() {
     if (activeTab === "url") return !!urlInput.trim();
     if (activeTab === "email") return !!emailInput.trim();
     if (activeTab === "mobile") return !!mobileInput.trim();
+    return false;
   }, [activeTab, urlInput, emailInput, mobileInput]);
 
   const handleCheck = useCallback(async () => {
@@ -51,7 +49,11 @@ export function Hero() {
       } else {
         setUrlRes(null); setEmailRes(null);
         const parsed = parseAuPhone(mobileInput);
-        if (!parsed) throw new Error("Due to the limited functionality of the prototype, please only enter an AU number like (+61)412345678, +61412345678, or 61412345678");
+        if (!parsed) {
+          throw new Error(
+            "Due to the limited functionality of the prototype, please only enter an AU number like (+61)412345678, +61412345678, or 61412345678"
+          );
+        }
         const data = await checkMobile({
           e164: parsed.e164,
           country_code: parsed.country_code,
@@ -74,156 +76,166 @@ export function Hero() {
   );
 
   return (
-    <section id="home" className="py-20 lg:py-32">
-      <div className="container mx-auto px-4">
-        <div className="text-center space-y-6 mb-16">
-          <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full">
-            <Shield className="h-5 w-5 text-primary" />
-            <span className="text-primary font-medium">Security First</span>
+    <section id="home" className="hero-root">
+      {/* decorative blobs */}
+      <div className="hero-blob hero-blob-a" />
+      <div className="hero-blob hero-blob-b" />
+
+      <div className="hero-container">
+        <div className="hero-header">
+          <div className="hero-badge">
+            <Shield size={18} />
+            <span>Security First</span>
           </div>
-          <h1 className="text-4xl lg:text-6xl font-bold tracking-tight">
-            Check for
-            <span className="text-primary"> Malicious</span>
-            <br />Content Instantly
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Protect yourself online by checking URLs, email addresses, and phone numbers 
-            for potential threats. Get instant security analysis with detailed explanations.
-          </p>
+
+          <Typography.Title level={1} className="hero-title">
+            Check for <span className="hero-title-accent">Malicious</span>
+            <br /> Content Instantly
+          </Typography.Title>
+
+          <Typography.Paragraph className="hero-sub">
+            Protect yourself online by checking URLs, email addresses, and phone
+            numbers for potential threats. Get instant security analysis with
+            detailed explanations.
+          </Typography.Paragraph>
         </div>
 
-        <div className="max-w-2xl mx-auto mb-16">
-          <Card className="border-2">
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="flex items-center justify-center space-x-2">
-                <Search className="h-5 w-5" />
-                <span>Security Scanner</span>
-              </CardTitle>
-              <CardDescription>
-                Enter a URL, email address, or phone number to check for security threats
-              </CardDescription>
-            </CardHeader>
+        <div className="hero-card-wrap">
+          <Card className="hero-card" bordered>
+            <div className="hero-card-head">
+              <Search size={18} />
+              <span>Security Scanner</span>
+            </div>
+            <div className="hero-card-desc">
+              Enter a URL, email address, or phone number to check for security threats
+            </div>
 
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="url" className="flex items-center space-x-2">
-                    <Globe className="h-4 w-4" />
-                    <span>Website URL</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="email" className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4" />
-                    <span>Email</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="phone" className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4" />
-                    <span>Phone</span>
-                  </TabsTrigger>
-                </TabsList>
+            <Tabs
+              activeKey={activeTab}
+              onChange={(k) => setActiveTab(k as Tab)}
+              items={[
+                {
+                  key: "url",
+                  label: (
+                    <span className="hero-tab">
+                      <Globe size={16} /> Website URL
+                    </span>
+                  ),
+                  children: (
+                    <div className="hero-pane">
+                      <label className="hero-label" htmlFor="url-input">
+                        Website URL
+                      </label>
+                      <Input
+                        id="url-input"
+                        size="large"
+                        placeholder="https://example.com"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        onKeyDown={onEnter}
+                      />
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="hero-cta"
+                        onClick={handleCheck}
+                        disabled={!canSubmit || loading}
+                        loading={loading}
+                        icon={<Shield size={18} />}
+                      >
+                        Check Website Security
+                      </Button>
 
-                {/* URL */}
-                <TabsContent value="url" className="space-y-4 mt-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Website URL</label>
-                    <Input
-                      placeholder="https://example.com"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      onKeyDown={onEnter}
-                      className="text-lg h-12"
-                    />
-                  </div>
+                      {error && (
+                        <Alert className="hero-alert" type="error" showIcon message={error} />
+                      )}
 
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    onClick={handleCheck} 
-                    disabled={!canSubmit || loading}
-                    aria-busy={loading}
-                    style={{ width: '100%', height: '48px' }}
-                    icon={<Shield className="h-5 w-5" />}
-                  >
-                    Check Website Security
-                  </Button>
-
-                  {error && (
-                      <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-red-900">
-                        <div className="flex items-center gap-2"><Info className="h-4 w-4"/><span>{error}</span></div>
-                      </div>
-                    )}
-
-                  {urlRes && <RiskCard kind="url" data={urlRes} />}
-                </TabsContent>
-
-                {/* EMAIL */}
-                <TabsContent value="email" className="space-y-4 mt-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email Address</label>
-                    <Input
-                      placeholder="user@example.com"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      onKeyDown={onEnter}
-                      className="text-lg h-12"
-                    />
-                  </div>
-
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    onClick={handleCheck} 
-                    disabled={!canSubmit || loading}
-                    aria-busy={loading}
-                    style={{ width: '100%', height: '48px' }}
-                    icon={<Mail className="h-5 w-5" />}
-                  >
-                    Check Email Safety
-                  </Button>
-
-                  {error && activeTab === "email" && (
-                    <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-red-900">
-                      <div className="flex items-center gap-2"><Info className="h-4 w-4"/><span>{error}</span></div>
+                      {urlRes && <RiskCard kind="url" data={urlRes} />}
                     </div>
-                  )}
+                  ),
+                },
+                {
+                  key: "email",
+                  label: (
+                    <span className="hero-tab">
+                      <Mail size={16} /> Email
+                    </span>
+                  ),
+                  children: (
+                    <div className="hero-pane">
+                      <label className="hero-label" htmlFor="email-input">
+                        Email Address
+                      </label>
+                      <Input
+                        id="email-input"
+                        size="large"
+                        placeholder="user@example.com"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        onKeyDown={onEnter}
+                      />
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="hero-cta"
+                        onClick={handleCheck}
+                        disabled={!canSubmit || loading}
+                        loading={loading}
+                        icon={<Mail size={18} />}
+                      >
+                        Check Email Safety
+                      </Button>
 
-                  {emailRes && <RiskCard kind="email" data={emailRes} />}
-                </TabsContent>
+                      {error && activeTab === "email" && (
+                        <Alert className="hero-alert" type="error" showIcon message={error} />
+                      )}
 
-                {/* MOBILE NUMBER */}
-                <TabsContent value="phone" className="space-y-4 mt-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Phone Number</label>
-                    <Input
-                      placeholder="+61 412 345 678 or (+61) 412 345 678 or 61412345678"
-                      value={mobileInput}
-                      onChange={(e) => setMobileInput(e.target.value)}
-                      onKeyDown={onEnter}
-                      className="text-lg h-12"
-                    />
-                  </div>
-
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    onClick={handleCheck} 
-                    disabled={!canSubmit || loading}
-                    aria-busy={loading}
-                    style={{ width: '100%', height: '48px' }}
-                    icon={<Phone className="h-5 w-5" />}
-                  >
-                    Check Phone Number
-                  </Button>
-
-                  {error && activeTab === "mobile" && (
-                    <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-red-900">
-                      <div className="flex items-center gap-2"><Info className="h-4 w-4"/><span>{error}</span></div>
+                      {emailRes && <RiskCard kind="email" data={emailRes} />}
                     </div>
-                  )}
+                  ),
+                },
+                {
+                  key: "mobile",
+                  label: (
+                    <span className="hero-tab">
+                      <Phone size={16} /> Phone
+                    </span>
+                  ),
+                  children: (
+                    <div className="hero-pane">
+                      <label className="hero-label" htmlFor="phone-input">
+                        Phone Number
+                      </label>
+                      <Input
+                        id="phone-input"
+                        size="large"
+                        placeholder="+61 412 345 678 or (+61) 412 345 678 or 61412345678"
+                        value={mobileInput}
+                        onChange={(e) => setMobileInput(e.target.value)}
+                        onKeyDown={onEnter}
+                      />
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="hero-cta"
+                        onClick={handleCheck}
+                        disabled={!canSubmit || loading}
+                        loading={loading}
+                        icon={<Phone size={18} />}
+                      >
+                        Check Phone Number
+                      </Button>
 
-                  {mobileRes && <RiskCard kind="mobile" data={mobileRes} />}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
+                      {error && activeTab === "mobile" && (
+                        <Alert className="hero-alert" type="error" showIcon message={error} />
+                      )}
+
+                      {mobileRes && <RiskCard kind="mobile" data={mobileRes} />}
+                    </div>
+                  ),
+                },
+              ]}
+            />
           </Card>
         </div>
       </div>
@@ -231,4 +243,4 @@ export function Hero() {
   );
 }
 
-
+export default Hero;
