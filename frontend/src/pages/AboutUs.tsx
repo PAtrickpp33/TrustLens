@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; //last version
 
 const AboutUs: React.FC = () => {
   const year = new Date().getFullYear();
