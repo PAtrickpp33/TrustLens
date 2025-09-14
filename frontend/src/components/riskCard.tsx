@@ -4,6 +4,8 @@ import { useState } from "react";
 import { getRiskUi } from "@/lib/riskUi";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 import { reportUrl, reportEmail, reportMobile } from "@/lib/api";
+import { Flag } from "lucide-react";
+import { message } from "antd";
 
 type Props =
   | { kind: "url";    data: UrlRiskData }
@@ -65,8 +67,10 @@ export default function RiskCard(props: Props) {
         // backend accepts either e164 or country_code + national_number
         await reportMobile({ e164: d.e164 });
       }
+      message.success("Report successful");
     } catch (e: any) {
       setReportError(e?.message ?? "Failed to report");
+      message.error(e?.message ?? "Failed to report");
     } finally {
       setIsReporting(false);
     }
@@ -103,7 +107,14 @@ export default function RiskCard(props: Props) {
         <p className="text-xs text-muted-foreground">{metaLine}</p>
 
         <div className="flex items-center gap-2 pt-2">
-          <Button onClick={onReportClick} disabled={isReporting} variant="outline" size="sm">
+          <Button
+            onClick={onReportClick}
+            disabled={isReporting}
+            variant="default"
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 border-blue-700 focus-visible:ring-blue-600"
+          >
+            <Flag />
             {isReporting ? "Reporting..." : "Report"}
           </Button>
           {reportError ? (
