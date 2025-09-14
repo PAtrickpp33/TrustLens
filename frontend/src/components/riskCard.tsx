@@ -3,7 +3,7 @@ import { useState } from "react";
 import { getRiskUi } from "@/lib/riskUi";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 import { reportUrl, reportEmail, reportMobile } from "@/lib/api";
-import { Flag } from "lucide-react";
+import { Flag, CheckCircle2 } from "lucide-react";
 import { Button, message } from "antd";
 
 type Props =
@@ -17,6 +17,7 @@ export default function RiskCard(props: Props) {
   const ui = getRiskUi(kind, level);
   const [isReporting, setIsReporting] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [isReported, setIsReported] = useState(false);
 
   const title = (() => {
     switch (kind) {
@@ -67,6 +68,7 @@ export default function RiskCard(props: Props) {
         await reportMobile({ e164: d.e164 });
       }
       message.success("Report successful");
+      setIsReported(true);
     } catch (e: any) {
       setReportError(e?.message ?? "Failed to report");
       message.error(e?.message ?? "Failed to report");
@@ -107,13 +109,14 @@ export default function RiskCard(props: Props) {
 
         <div className="flex items-center gap-2 pt-2">
           <Button
-            type="primary"
+            type={isReported ? "default" : "primary"}
             size="small"
-            icon={<Flag size={16} />}
+            icon={isReported ? <CheckCircle2 size={16} /> : <Flag size={16} />}
             loading={isReporting}
+            disabled={isReported || isReporting}
             onClick={onReportClick}
           >
-            {isReporting ? "Reporting..." : "Report"}
+            {isReported ? "Reported" : isReporting ? "Reporting..." : "Report"}
           </Button>
           {reportError ? (
             <span className="text-xs text-red-600">{reportError}</span>
