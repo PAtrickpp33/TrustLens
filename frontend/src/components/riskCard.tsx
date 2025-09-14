@@ -1,11 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { getRiskUi } from "@/lib/riskUi";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 import { reportUrl, reportEmail, reportMobile } from "@/lib/api";
 import { Flag } from "lucide-react";
-import { message } from "antd";
+import { Button, message } from "antd";
 
 type Props =
   | { kind: "url";    data: UrlRiskData }
@@ -108,13 +107,12 @@ export default function RiskCard(props: Props) {
 
         <div className="flex items-center gap-2 pt-2">
           <Button
+            type="primary"
+            size="small"
+            icon={<Flag size={16} />}
+            loading={isReporting}
             onClick={onReportClick}
-            disabled={isReporting}
-            variant="default"
-            size="sm"
-            className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-600 border-blue-700 focus-visible:ring-blue-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
           >
-            <Flag className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-3" />
             {isReporting ? "Reporting..." : "Report"}
           </Button>
           {reportError ? (
