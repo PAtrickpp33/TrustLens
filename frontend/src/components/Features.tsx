@@ -1,11 +1,11 @@
 import { Card, Row, Col, Typography } from "antd";
-import { Shield, Zap, Globe, AlertTriangle, Eye, BarChart3 } from "lucide-react";
+import { Shield, Zap, Globe, AlertTriangle, Eye, BarChart3, type LucideIcon } from "lucide-react";
 import "./Features.css";
 
 const { Title, Paragraph } = Typography;
 
 type FeatureItem = {
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
   title: string;
   description: string;
 };
