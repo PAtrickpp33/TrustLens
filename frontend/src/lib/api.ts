@@ -163,3 +163,107 @@ export async function checkMobile(
   }
   return json.data;
 }
+
+// Report endpoints
+
+export async function reportUrl(url: string, timeoutMs = 12_000): Promise<UrlRiskData> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  const res = await fetch(`${API_BASE}/api/v1/url/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error");
+  });
+  clearTimeout(t);
+
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "");
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<UrlRiskData>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response");
+  }
+  return json.data;
+}
+
+export async function reportEmail(address: string, timeoutMs = 12_000): Promise<EmailRiskData> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  const res = await fetch(`${API_BASE}/api/v1/email/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error");
+  });
+  clearTimeout(t);
+
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "");
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<EmailRiskData>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response");
+  }
+  return json.data;
+}
+
+type MobileReportPayload = {
+  e164?: string;
+  country_code?: string;
+  national_number?: string;
+};
+
+export async function reportMobile(
+  payload: MobileReportPayload,
+  timeoutMs = 12_000
+): Promise<MobileRiskData> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  const res = await fetch(`${API_BASE}/api/v1/mobile/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error");
+  });
+  clearTimeout(t);
+
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "");
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<MobileRiskData>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response");
+  }
+  return json.data;
+}

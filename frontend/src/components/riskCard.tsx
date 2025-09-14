@@ -1,6 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { getRiskUi } from "@/lib/riskUi";
 import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
+import { reportUrl, reportEmail, reportMobile } from "@/lib/api";
 
 type Props =
   | { kind: "url";    data: UrlRiskData }
@@ -11,6 +14,8 @@ export default function RiskCard(props: Props) {
   const { kind } = props;
   const level = props.data.risk_level as 0 | 1 | 2 | 3;
   const ui = getRiskUi(kind, level);
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const title = (() => {
     switch (kind) {
@@ -45,6 +50,28 @@ export default function RiskCard(props: Props) {
     }
   })();
 
+  async function onReportClick() {
+    setReportError(null);
+    setIsReporting(true);
+    try {
+      if (kind === "url") {
+        const d = (props as any).data as UrlRiskData;
+        await reportUrl(d.url);
+      } else if (kind === "email") {
+        const d = (props as any).data as EmailRiskData;
+        await reportEmail(d.address);
+      } else {
+        const d = (props as any).data as MobileRiskData;
+        // backend accepts either e164 or country_code + national_number
+        await reportMobile({ e164: d.e164 });
+      }
+    } catch (e: any) {
+      setReportError(e?.message ?? "Failed to report");
+    } finally {
+      setIsReporting(false);
+    }
+  }
+
   return (
     <Card className={`mt-4 border-2 ${ui.border}`}>
       <CardHeader>
@@ -74,6 +101,15 @@ export default function RiskCard(props: Props) {
         </div>
 
         <p className="text-xs text-muted-foreground">{metaLine}</p>
+
+        <div className="flex items-center gap-2 pt-2">
+          <Button onClick={onReportClick} disabled={isReporting} variant="outline" size="sm">
+            {isReporting ? "Reporting..." : "Report"}
+          </Button>
+          {reportError ? (
+            <span className="text-xs text-red-600">{reportError}</span>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
