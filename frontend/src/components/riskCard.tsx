@@ -112,9 +112,9 @@ export default function RiskCard(props: Props) {
             disabled={isReporting}
             variant="default"
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 border-blue-700 focus-visible:ring-blue-600"
+            className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-600 border-blue-700 focus-visible:ring-blue-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
           >
-            <Flag />
+            <Flag className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-3" />
             {isReporting ? "Reporting..." : "Report"}
           </Button>
           {reportError ? (
