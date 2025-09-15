@@ -18,7 +18,7 @@ type FeatureItem = {
   icon: LucideIcon;
   title: string;
   description: string;
-  to?: string; // مقصد کلیک
+  to?: string;
 };
 
 const features: FeatureItem[] = [
@@ -27,7 +27,6 @@ const features: FeatureItem[] = [
     title: "Advanced Threat Detection",
     description:
       "Detect malware, phishing, scams, and other security threats using advanced AI algorithms and real-time threat intelligence.",
-    // چارت روند: Scans vs Detected
     to: "/overview#trend",
   },
   {
@@ -35,23 +34,20 @@ const features: FeatureItem[] = [
     title: "Instant Analysis",
     description:
       "Get security results in seconds with our high-performance scanning engine that processes millions of queries daily.",
-    // ابزار اصلی اسکن (در روت، صفحه ScamCheck)
-    to: "/",
+    to: "/", // ScamCheck
   },
   {
     icon: Globe,
-    title: "Multi-Type Scanning",
+    title: "Report a Scam",
     description:
-      "Comprehensive checking for websites, email addresses, and phone numbers all in one powerful platform.",
-    // اگر در Overview سکشنی برای نوع ورودی داری:
-    to: "/overview#multi-type-scanning",
+      "Report suspicious websites, emails, or phone numbers. Every report strengthens ScamCheck and helps protect more people.",
+    to: "/report?type=url", // 👈 Epic 4: Report a Scam
   },
   {
     icon: AlertTriangle,
     title: "Risk Assessment",
     description:
       "Detailed risk levels with clear explanations helping you understand potential threats and make informed decisions.",
-    // دوناتِ سهم دسته‌ها = ارزیابی ریسک
     to: "/overview#detection-share",
   },
   {
@@ -59,7 +55,6 @@ const features: FeatureItem[] = [
     title: "Privacy Protected",
     description:
       "Your queries are processed securely and privately. We don't store personal information or track your activity.",
-    // سیاست‌های حریم‌خصوصی
     to: "/about#privacy",
   },
   {
@@ -67,7 +62,6 @@ const features: FeatureItem[] = [
     title: "Detailed Reports",
     description:
       "Comprehensive security reports with actionable insights, threat breakdowns, and safety recommendations.",
-    // گزارش کلی Overview
     to: "/overview",
   },
 ];
@@ -93,6 +87,7 @@ export function Features() {
     if (to === "/overview") return "Open Overview →";
     if (to.startsWith("/about")) return "Read policy →";
     if (to === "/") return "Try ScamCheck →";
+    if (to.startsWith("/report")) return "Report a scam →";
     return "Open →";
   };
 

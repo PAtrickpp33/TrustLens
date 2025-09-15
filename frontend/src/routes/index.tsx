@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+
 import Quiz from '@/pages/Quiz';
 import ScamCheck from '@/pages/ScamCheck';
 import AboutUs from '@/pages/AboutUs';
@@ -13,10 +14,16 @@ import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
 import { ProtectedRoute, SiteGate } from './protected';
+
 import LandingDashboard from '@/pages/LandingDashboard';
 import LandingOverview from '@/pages/LandingOverview';
 
-// Suspense wrapper
+
+import ReportScam from '@/pages/ReportScam';
+import ReportSuccess from '@/pages/ReportSuccess';
+
+// import AdminReportsQueue from '@/pages/admin/AdminReportsQueue';
+
 const withSuspense = (element: React.ReactElement) => (
   <Suspense fallback={<LoadingSpinner />}>
     {element}
@@ -33,20 +40,28 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ScamCheck /> },
+
+      // 👉 Epic 4
+      { path: 'report', element: <ReportScam /> },
+      { path: 'report/success', element: <ReportSuccess /> },
+
       { path: 'features', element: <Quiz /> },
       { path: 'about', element: <AboutUs /> },
       { path: 'landing', element: <LandingDashboard /> },
-      { path: 'overview', element: <LandingOverview /> },   
+      { path: 'overview', element: <LandingOverview /> },
+
       {
         path: 'articles',
         element: <ArticlesLayout />,
         children: [
           { index: true, element: <Articles /> },
-          { path: ':slug', element: <ArticleDetail /> }
-        ]
+          { path: ':slug', element: <ArticleDetail /> },
+        ],
       },
+
       // Hidden editor route (no nav link)
       { path: 'hidden/articles-editor', element: <ArticlesEditor /> },
+
       {
         path: 'dashboard',
         element: withSuspense(
@@ -55,10 +70,13 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
-          { path: 'results', element: <Results /> }
-        ]
-      }
-    ]
+          { path: 'results', element: <Results /> },
+        ],
+      },
+
+    
+      // { path: 'admin/reports', element: <AdminReportsQueue /> },
+    ],
   },
   {
     path: '*',
@@ -66,6 +84,6 @@ export const router = createBrowserRouter([
       <SiteGate>
         <NotFound />
       </SiteGate>
-    )
-  }
+    ),
+  },
 ]);
