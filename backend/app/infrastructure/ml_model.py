@@ -1,10 +1,10 @@
 import json
 import torch
-from ..core.config import llm_settings
+from app.core.config import llm_settings
 
 # ======== Encoders & Dynamic URLNet builder ========
-from ...AI_model.encoders_from_notebook import enc_char_url, enc_words, enc_token_chars  # 你的编码器
-from ...AI_model.modeldef_from_notebook import build_urlnet_from_state_dict             # 动态搭建模型
+from AI_model.encoders_from_notebook import enc_char_url, enc_words, enc_token_chars  # 你的编码器
+from AI_model.modeldef_from_notebook import build_urlnet_from_state_dict             # 动态搭建模型
 
 META_PATH = llm_settings.meta_path
 WEIGHT_PATH = llm_settings.weight_path
