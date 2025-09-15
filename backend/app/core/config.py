@@ -69,6 +69,7 @@ class LLMSettings(BaseSettings):
 llm_settings = LLMSettings()
 
 if __name__ == "__main__":
+    # To test if working
     print(llm_settings.gemini_api_key)
     print(llm_settings.meta_path)
     print(llm_settings.weight_path)
