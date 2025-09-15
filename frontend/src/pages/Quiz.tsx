@@ -223,6 +223,7 @@ const Quiz: React.FC = () => {
             <div style={{ borderTop: `1px solid ${C.border}`, padding: 16 }}>
               {log.map((r, i) => {
                 const ok = r.chosenIndex === r.correctIndex;
+                const sources = r.sources ?? [];
                 return (
                   <div key={i} style={{ padding: 12, border: `1px solid ${ok ? "#DCFCE7" : "#FEE2E2"}`, background: ok ? C.okBg : C.badBg, borderRadius: 12, marginBottom: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -251,12 +252,12 @@ const Quiz: React.FC = () => {
                       <div style={{ marginBottom: 6 }}>
                         <b>Your answer:</b> {r.options[r.chosenIndex]}
                       </div>
-                      {!!r.sources?.length && (
+                      {sources.length > 0 && (
                         <div style={{ fontSize: 12, color: C.sub }}>
                           Sources:
-                          {r.sources.map((s: any, j: number) => (
+                          {sources.map((s: any, j: number) => (
                             <a key={s.url} href={s.url} target="_blank" rel="noreferrer" style={{ marginLeft: 6, textDecoration: "underline", color: "#1D4ED8" }}>
-                              {s.label}{j < r.sources.length - 1 ? "," : ""}
+                              {s.label}{j < sources.length - 1 ? "," : ""}
                             </a>
                           ))}
                         </div>
