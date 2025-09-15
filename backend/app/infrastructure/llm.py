@@ -1,6 +1,6 @@
 import google.generativeai as genai
-from ..core.config import llm_settings
-from ml_model import URLScorer
+from app.core.config import llm_settings
+from app.infrastructure.ml_model import URLScorer
 
 GEMINI_API_KEY = llm_settings.gemini_api_key
 GEMINI_MODEL = llm_settings.gemini_model
