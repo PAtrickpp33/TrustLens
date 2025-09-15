@@ -1,6 +1,6 @@
 # encoders_from_notebook.py
 import numpy as np
-from utils_from_notebook import PAD_ID, UNK_ID, tok_chars_url, tok_words, tok_chars_token
+from AI_model.utils_from_notebook import PAD_ID, UNK_ID, tok_chars_url, tok_words, tok_chars_token
 
 def enc_char_url(u, char2id, max_len=256):
     ids = [char2id.get(ch, UNK_ID) for ch in tok_chars_url(u)[:max_len]]
