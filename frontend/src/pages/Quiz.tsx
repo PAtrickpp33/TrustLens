@@ -75,7 +75,7 @@ function ScoreRing({ pct, size = 140 }: { pct: number; size?: number }) {
 
 /* ---------- component ---------- */
 const Quiz: React.FC = () => {
-  // آماده‌سازی 10 سؤال با جابجایی گزینه‌های صحیح
+  // 10
   const prepared = useMemo(() => {
     const chosen = pickRandom(QUIZ, Math.min(10, QUIZ.length));
     return chosen.map((q) => {
@@ -88,7 +88,7 @@ const Quiz: React.FC = () => {
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
-  // برای Review
+  // for Review
   const [log, setLog] = useState<{ question: string; options: string[]; correctIndex: number; chosenIndex: number; sources?: any[] }[]>([]);
   const [showReview, setShowReview] = useState(false);
 
@@ -134,7 +134,7 @@ const Quiz: React.FC = () => {
     }
   };
 
-  // شورتکات‌های کیبورد: 1..4 / A..D و Enter
+  // 1..4 / A..D  Enter
   const keyHandler = useCallback(
     (e: KeyboardEvent) => {
       const map: Record<string, number> = { "1": 0, "2": 1, "3": 2, "4": 3, a: 0, b: 1, c: 2, d: 3 };
@@ -186,7 +186,7 @@ const Quiz: React.FC = () => {
     );
   }
 
-  /* ---------- result (جدید و جذاب) ---------- */
+  /* ---------- result  ---------- */
   if (phase === "result") {
     const pct = Math.round((score / total) * 100);
     const msg = score <= 3 ? "Needs improvement — review our red-flags." : score <= 7 ? "Good awareness — keep practicing." : "Excellent scam-savvy!";
