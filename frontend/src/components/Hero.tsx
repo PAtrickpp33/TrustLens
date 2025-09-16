@@ -2,11 +2,12 @@ import { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
 import { Shield, Globe, Mail, Search } from "lucide-react";
 import RiskCard from "./riskCard";
-import { checkUrl, checkEmail } from "@/lib/api";
-import type { UrlRiskData, EmailRiskData } from "@/lib/api";
+import LlmRecommendationCard from "@/components/ui/llmRecommendationCard";
+import { checkEmail, llmRecommendUrl } from "@/lib/api";
+import type { UrlRecommendResponse, EmailRiskData } from "@/lib/api";
 import "./Hero.css";
 
-type Tab = "url" | "email" | "mobile";
+type Tab = "url" | "email" ;
 
 export function Hero() {
   const [activeTab, setActiveTab] = useState<Tab>("url");
@@ -20,7 +21,7 @@ export function Hero() {
   const [error, setError] = useState<string | null>(null);
 
   // results
-  const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
+  const [urlRes, setUrlRes] = useState<UrlRecommendResponse | null>(null);
   const [emailRes, setEmailRes] = useState<EmailRiskData | null>(null);
 
   const canSubmit = useMemo(() => {
@@ -36,7 +37,7 @@ export function Hero() {
     try {
       if (activeTab === "url") {
         setEmailRes(null);
-        const data = await checkUrl(urlInput.trim());
+        const data = await llmRecommendUrl(urlInput.trim());
         setUrlRes(data);
       } else if (activeTab === "email") {
         setUrlRes(null);
@@ -132,7 +133,7 @@ export function Hero() {
                         <Alert className="hero-alert" type="error" showIcon message={error} />
                       )}
 
-                      {urlRes && <RiskCard kind="url" data={urlRes} />}
+                      {urlRes && <LlmRecommendationCard data={urlRes} />}
                     </div>
                   ),
                 },
