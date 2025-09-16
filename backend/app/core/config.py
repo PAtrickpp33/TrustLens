@@ -54,7 +54,7 @@ class LLMSettings(BaseSettings):
     def _validate_thinking_budget(self):
         if self.gemini_model.lower() == "gemini-2.5-pro" and self.thinking_budget == 0:
             raise ValueError(f"Cannot disable thinking for {self.gemini_model}.")
-        if not self.gemini_model.lower().startswith("gemini-2.5"):
+        if not self.gemini_model.lower() in ["gemini-2.5-pro", "gemini-2.5-flash"]:
             raise ValueError(f"Cannot set thinking budget for non-thinking versions of Gemini")
         return self
     
@@ -77,9 +77,3 @@ class LLMSettings(BaseSettings):
                 return str(res[0])
         
 llm_settings = LLMSettings()
-
-if __name__ == "__main__":
-    # To test if working
-    print(llm_settings.gemini_api_key)
-    print(llm_settings.meta_path)
-    print(llm_settings.weight_path)
