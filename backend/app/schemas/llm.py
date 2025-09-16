@@ -18,7 +18,7 @@ class Recommendation(BaseModel):
     risk_band: str
     action: str
     confidence_note: str
-    evidence: List[str]
+    evidence: str # List[str]
     recommended_next_steps: List[str]
     user_safe_message: str
     notes_for_analyst: str
