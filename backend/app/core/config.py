@@ -2,6 +2,7 @@ from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import model_validator
 from pathlib import Path
+import re
 
 class Settings(BaseSettings):
     app_name: str = "TrustLens API"
@@ -34,11 +35,13 @@ class LLMSettings(BaseSettings):
     gemini_api_key: str
     
     # Optionals with defaults
-    gemini_model: str = "gemini-1.5-flash"
-    max_tokens: int = 256
+    gemini_model: str = "gemini-2.5-flash"
+    max_tokens: int = 1024
     temp: float = 0.2
     th_high: float = 0.8
     th_med: float = 0.5
+    th_low: float = 0.1
+    thinking_budget: int = 0 # Allows the model to think & generate better responses; 0 if off
     
     model_config = SettingsConfigDict(env_prefix="", env_file=".env", extra="ignore")
     
@@ -48,6 +51,15 @@ class LLMSettings(BaseSettings):
             raise ValueError("GEMINI_API_KEY must be set in environment or .env")
         return self
     
+    @model_validator(mode="after")
+    def _validate_thinking_budget(self):
+        if self.gemini_model.lower() == "gemini-2.5-pro" and self.thinking_budget == 0:
+            raise ValueError(f"Cannot disable thinking for {self.gemini_model}.")
+        model_num = re.search(r"^\w+-(\d\.\d)(?:-\w+)+$", self.gemini_model).groups()
+        if model_num and str(model_num[0]) != "2.5":
+            raise ValueError(f"Cannot set thinking budget for Gemini versions earlier than 2.5.")
+        return self
+    
     @property
     def meta_path(self) -> str:
         for parent in Path(__file__).parents:
@@ -55,7 +67,7 @@ class LLMSettings(BaseSettings):
                 return "meta.json" # Default insists that meta.json is in app/core
             res = list(parent.rglob("**/meta.json"))
             if res:
-                return res[0]
+                return str(res[0])
     
     @property
     def weight_path(self) -> str:
@@ -64,7 +76,7 @@ class LLMSettings(BaseSettings):
                 return "urlnet_model.bin" # Default insists that *.bin is in app/core
             res = list(parent.rglob("**/urlnet_model.bin"))
             if res:
-                return res[0]
+                return str(res[0])
         
 llm_settings = LLMSettings()
 
