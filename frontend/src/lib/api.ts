@@ -1,6 +1,7 @@
-// Small typed client for your FastAPI
+// Small typed client for FastAPI
 // Robust base URL resolution to avoid mixed-content issues in browsers
 import { env } from './env';
+
 function resolveApiBase(): string {
   const configured = (env.apiBaseUrl ?? "").trim();
   let base = configured;
@@ -15,6 +16,10 @@ function resolveApiBase(): string {
 }
 
 export const API_BASE = resolveApiBase();
+const URL_BASE = `${API_BASE}/api/v1/url`;
+const EMAIL_BASE = `${API_BASE}/api/v1/email`;
+const MOBILE_BASE = `${API_BASE}/api/v1/mobile`;
+const LLM_BASE = `${API_BASE}/api/v1/llm`;
 
 type ApiResponse<T> = {
   success: boolean;
@@ -58,13 +63,46 @@ type MobileCheckPayload = {
   national_number: string;  // e.g., "412345678"
 };
 
+// Richard: Added ML-AI prediction functionality for URL
+// LLM URL scoring & recommendation
+
+// Be flexible in case backend returns a slightly different band/action in the future.
+export type RiskBand = "safe" | "low" | "medium" | "high" | "critical" | (string & {});
+export type LLMAction =
+  | "allow"
+  | "allow_with_warning"
+  | "block_now"
+  | "investigate"
+  | (string & {});
+
+// Matches ScoreResponse from your FastAPI route
+export type UrlScoreResponse = {
+  url: string;
+  ascii_safe_url: string;
+  score: number;        // higher = riskier (per your scorer)
+  risk_band: RiskBand;  // derived from score on the server
+};
+
+// Matches RecommendResponse (extends ScoreResponse + llm payload)
+export type UrlRecommendResponse = UrlScoreResponse & {
+  llm: {
+    risk_band: RiskBand;                 // echoed for convenience
+    action: LLMAction;                   // server-enforced action
+    confidence_note: string;
+    evidence: string;
+    recommended_next_steps: string[];    // up to 4 items
+    user_safe_message: string;
+    notes_for_analyst: string;
+  };
+};
+
 // URL check request to backend API
 
 export async function checkUrl(url: string, timeoutMs = 12000): Promise<UrlRiskData> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/url/check`, {
+  const res = await fetch(`${URL_BASE}/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
@@ -101,7 +139,7 @@ export async function checkEmail(
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/email/check`, {
+  const res = await fetch(`${EMAIL_BASE}/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ address }),
@@ -137,7 +175,7 @@ export async function checkMobile(
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/mobile/check`, {
+  const res = await fetch(`${MOBILE_BASE}/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -170,7 +208,7 @@ export async function reportUrl(url: string, timeoutMs = 12_000): Promise<UrlRis
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/url/report`, {
+  const res = await fetch(`${URL_BASE}/report`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
@@ -201,7 +239,7 @@ export async function reportEmail(address: string, timeoutMs = 12_000): Promise<
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/email/report`, {
+  const res = await fetch(`${EMAIL_BASE}/report`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ address }),
@@ -241,7 +279,7 @@ export async function reportMobile(
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
-  const res = await fetch(`${API_BASE}/api/v1/mobile/report`, {
+  const res = await fetch(`${MOBILE_BASE}/report`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -266,4 +304,70 @@ export async function reportMobile(
     throw new Error((json as any)?.error ?? "Unexpected API response");
   }
   return json.data;
+}
+
+// Richard: For probabilistic risk scoring of URL
+export async function llmScoreUrl(url: string, timeoutMs = 12_000): Promise<UrlScoreResponse> {
+  const controller = new AbortController()
+  const t = setTimeout(() => controller.abort(), timeoutMs)
+  
+  const res = await fetch(`${LLM_BASE}/score`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error")
+  })
+  clearTimeout(t)
+
+  // When 400/422 message received
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "")
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? j?.error ?? `HTTP ${res.status}`)
+    } catch {
+      throw new Error(`HTTP ${res.status}`)
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<UrlScoreResponse>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response")
+  }
+  return json.data
+}
+
+// Richard: For AI-generated recommendations based on URL score
+export async function llmRecommendUrl(url: string, timeoutMs = 12_000): Promise<UrlRecommendResponse> {
+  const controller = new AbortController()
+  const t = setTimeout(() => controller.abort(), timeoutMs)
+
+  const res = await fetch(`${LLM_BASE}/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error")
+  })
+  clearTimeout(t)
+
+  // When 400/422 message received
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "")
+    try {
+      const j = JSON.parse(maybeText)
+      throw new Error(j?.detail ?? j?.error ?? `HTTP ${res.status}`)
+    } catch {
+      throw new Error(`HTTP ${res.status}`)
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<UrlRecommendResponse>
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response")
+  }
+  return json.data
 }
