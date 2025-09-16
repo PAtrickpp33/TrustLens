@@ -2,9 +2,8 @@ import { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
 import { Shield, Globe, Mail, Search } from "lucide-react";
 import RiskCard from "./riskCard";
-import { checkUrl, checkEmail, checkMobile } from "@/lib/api";
+import { checkUrl, checkEmail } from "@/lib/api";
 import type { UrlRiskData, EmailRiskData } from "@/lib/api";
-import { parseAuPhone } from "@/lib/phone";
 import "./Hero.css";
 
 type Tab = "url" | "email" | "mobile";
