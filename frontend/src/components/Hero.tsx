@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
-import { Shield, Globe, Mail, Phone, Search } from "lucide-react";
+import { Shield, Globe, Mail, Search } from "lucide-react";
 import RiskCard from "./riskCard";
 import { checkUrl, checkEmail, checkMobile } from "@/lib/api";
-import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
+import type { UrlRiskData, EmailRiskData } from "@/lib/api";
 import { parseAuPhone } from "@/lib/phone";
 import "./Hero.css";
 
@@ -15,7 +15,6 @@ export function Hero() {
   // inputs
   const [urlInput, setUrlInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
-  const [mobileInput, setMobileInput] = useState("");
 
   // status
   const [loading, setLoading] = useState(false);
@@ -24,14 +23,12 @@ export function Hero() {
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
   const [emailRes, setEmailRes] = useState<EmailRiskData | null>(null);
-  const [mobileRes, setMobileRes] = useState<MobileRiskData | null>(null);
 
   const canSubmit = useMemo(() => {
     if (activeTab === "url") return !!urlInput.trim();
     if (activeTab === "email") return !!emailInput.trim();
-    if (activeTab === "mobile") return !!mobileInput.trim();
     return false;
-  }, [activeTab, urlInput, emailInput, mobileInput]);
+  }, [activeTab, urlInput, emailInput]);
 
   const handleCheck = useCallback(async () => {
     setError(null);
@@ -39,34 +36,20 @@ export function Hero() {
 
     try {
       if (activeTab === "url") {
-        setEmailRes(null); setMobileRes(null);
+        setEmailRes(null);
         const data = await checkUrl(urlInput.trim());
         setUrlRes(data);
       } else if (activeTab === "email") {
-        setUrlRes(null); setMobileRes(null);
+        setUrlRes(null);
         const data = await checkEmail(emailInput.trim());
         setEmailRes(data);
-      } else {
-        setUrlRes(null); setEmailRes(null);
-        const parsed = parseAuPhone(mobileInput);
-        if (!parsed) {
-          throw new Error(
-            "Due to the limited functionality of the prototype, please only enter an AU number like (+61)412345678, +61412345678, or 61412345678"
-          );
-        }
-        const data = await checkMobile({
-          e164: parsed.e164,
-          country_code: parsed.country_code,
-          national_number: parsed.national_number,
-        });
-        setMobileRes(data);
-      }
+      } 
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
     } finally {
       setLoading(false);
     }
-  }, [activeTab, urlInput, emailInput, mobileInput]);
+  }, [activeTab, urlInput, emailInput]);
 
   const onEnter = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -193,48 +176,7 @@ export function Hero() {
                       {emailRes && <RiskCard kind="email" data={emailRes} />}
                     </div>
                   ),
-                },
-                // Richard: Hide the mobile tab since not currently working
-                // {
-                //   key: "mobile",
-                //   label: (
-                //     <span className="hero-tab">
-                //       <Phone size={16} /> Phone
-                //     </span>
-                //   ),
-                //   children: (
-                //     <div className="hero-pane">
-                //       <label className="hero-label" htmlFor="phone-input">
-                //         Phone Number
-                //       </label>
-                //       <Input
-                //         id="phone-input"
-                //         size="large"
-                //         placeholder="+61 412 345 678 or (+61) 412 345 678 or 61412345678"
-                //         value={mobileInput}
-                //         onChange={(e) => setMobileInput(e.target.value)}
-                //         onKeyDown={onEnter}
-                //       />
-                //       <Button
-                //         type="primary"
-                //         size="large"
-                //         className="hero-cta"
-                //         onClick={handleCheck}
-                //         disabled={!canSubmit || loading}
-                //         loading={loading}
-                //         icon={<Phone size={18} />}
-                //       >
-                //         Check Phone Number
-                //       </Button>
-
-                //       {error && activeTab === "mobile" && (
-                //         <Alert className="hero-alert" type="error" showIcon message={error} />
-                //       )}
-
-                //       {mobileRes && <RiskCard kind="mobile" data={mobileRes} />}
-                //     </div>
-                //   ),
-                // },
+                }
               ]}
             />
           </Card>
