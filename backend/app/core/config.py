@@ -2,7 +2,6 @@ from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import model_validator
 from pathlib import Path
-import re
 
 class Settings(BaseSettings):
     app_name: str = "TrustLens API"
@@ -55,9 +54,8 @@ class LLMSettings(BaseSettings):
     def _validate_thinking_budget(self):
         if self.gemini_model.lower() == "gemini-2.5-pro" and self.thinking_budget == 0:
             raise ValueError(f"Cannot disable thinking for {self.gemini_model}.")
-        model_num = re.search(r"^\w+-(\d\.\d)(?:-\w+)+$", self.gemini_model).groups()
-        if model_num and str(model_num[0]) != "2.5":
-            raise ValueError(f"Cannot set thinking budget for Gemini versions earlier than 2.5.")
+        if not self.gemini_model.lower().startswith("gemini-2.5"):
+            raise ValueError(f"Cannot set thinking budget for non-thinking versions of Gemini")
         return self
     
     @property
