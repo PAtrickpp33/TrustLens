@@ -194,46 +194,47 @@ export function Hero() {
                     </div>
                   ),
                 },
-                {
-                  key: "mobile",
-                  label: (
-                    <span className="hero-tab">
-                      <Phone size={16} /> Phone
-                    </span>
-                  ),
-                  children: (
-                    <div className="hero-pane">
-                      <label className="hero-label" htmlFor="phone-input">
-                        Phone Number
-                      </label>
-                      <Input
-                        id="phone-input"
-                        size="large"
-                        placeholder="+61 412 345 678 or (+61) 412 345 678 or 61412345678"
-                        value={mobileInput}
-                        onChange={(e) => setMobileInput(e.target.value)}
-                        onKeyDown={onEnter}
-                      />
-                      <Button
-                        type="primary"
-                        size="large"
-                        className="hero-cta"
-                        onClick={handleCheck}
-                        disabled={!canSubmit || loading}
-                        loading={loading}
-                        icon={<Phone size={18} />}
-                      >
-                        Check Phone Number
-                      </Button>
+                // Richard: Hide the mobile tab since not currently working
+                // {
+                //   key: "mobile",
+                //   label: (
+                //     <span className="hero-tab">
+                //       <Phone size={16} /> Phone
+                //     </span>
+                //   ),
+                //   children: (
+                //     <div className="hero-pane">
+                //       <label className="hero-label" htmlFor="phone-input">
+                //         Phone Number
+                //       </label>
+                //       <Input
+                //         id="phone-input"
+                //         size="large"
+                //         placeholder="+61 412 345 678 or (+61) 412 345 678 or 61412345678"
+                //         value={mobileInput}
+                //         onChange={(e) => setMobileInput(e.target.value)}
+                //         onKeyDown={onEnter}
+                //       />
+                //       <Button
+                //         type="primary"
+                //         size="large"
+                //         className="hero-cta"
+                //         onClick={handleCheck}
+                //         disabled={!canSubmit || loading}
+                //         loading={loading}
+                //         icon={<Phone size={18} />}
+                //       >
+                //         Check Phone Number
+                //       </Button>
 
-                      {error && activeTab === "mobile" && (
-                        <Alert className="hero-alert" type="error" showIcon message={error} />
-                      )}
+                //       {error && activeTab === "mobile" && (
+                //         <Alert className="hero-alert" type="error" showIcon message={error} />
+                //       )}
 
-                      {mobileRes && <RiskCard kind="mobile" data={mobileRes} />}
-                    </div>
-                  ),
-                },
+                //       {mobileRes && <RiskCard kind="mobile" data={mobileRes} />}
+                //     </div>
+                //   ),
+                // },
               ]}
             />
           </Card>
