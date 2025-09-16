@@ -67,12 +67,13 @@ type MobileCheckPayload = {
 // LLM URL scoring & recommendation
 
 // Be flexible in case backend returns a slightly different band/action in the future.
-export type RiskBand = "safe" | "low" | "medium" | "high" | "critical" | (string & {});
+export type RiskBand = "SAFE" | "LOW RISK" | "MEDIUM RISK" | "UNSAFE" | (string & {});
 export type LLMAction =
   | "allow"
   | "allow_with_warning"
-  | "block_now"
-  | "investigate"
+  | "block"
+  | "sandbox"
+  | "quarantine"
   | (string & {});
 
 // Matches ScoreResponse from your FastAPI route
