@@ -4,10 +4,10 @@
 # host:TrustLens user$ cd backend
 # host:backend user$ python -m data.crud.insert_email
 
-from .config import settings
-from .utils import get_dataset, chunk_records, batch_post
+from config import settings
+from utils import get_dataset, chunk_records, batch_post
 
-API_URL = f"{settings.api_url}/email/import"
+API_URL = f"{settings.api_url.strip()}/api/v1/email/import"
 
 def main():
     # Ex. dataset = "email_phishing_clean.parquet"

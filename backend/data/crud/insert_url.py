@@ -7,7 +7,7 @@
 from .config import settings
 from .utils import get_dataset, chunk_records, batch_post
 
-API_URL = f"{settings.api_url}/url/import"
+API_URL = f"{settings.api_url.strip()}/api/v1/url/import"
 
 def main():
     # Ex. dataset = "email_phishing_clean.parquet"
@@ -21,7 +21,7 @@ def main():
     # Convert to JSON array [{record 1}, {record 2}, ...]
     url_records = url_data.to_dict(orient="records")
     
-    url_batches = chunk_records(url_records[:10], chunk_size=1000)
+    url_batches = chunk_records(url_records[:10], chunk_size=500)
 
     # Send POST request to API to update remote DB
     batch_post(url_batches, API_URL, verbose=True)
