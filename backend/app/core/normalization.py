@@ -7,6 +7,7 @@ from urllib.parse import urlparse, urlunparse
 import phonenumbers
 from email_validator import validate_email, EmailNotValidError
 import tldextract
+import re
 
 
 def normalize_phone(*, e164: Optional[str] = None, country_code: Optional[str] = None, national_number: Optional[str] = None) -> Tuple[str, str, str]:
@@ -62,19 +63,39 @@ def normalize_url(url: str) -> Tuple[str, str, str, Optional[str], str]:
 
     Robustness improvements:
     - Trim surrounding whitespace
-    - Assume http scheme if missing
+    - Assume http scheme if missing // Richard: Assume https scheme instead to lower false positives
     - Lowercase scheme/host
     - Strip default ports, remove fragment, keep query
     """
     url = (url or "").strip()
     if not url:
         raise ValueError("URL cannot be empty")
+    
+    # CHANGED: Support scheme-relative URLs like //example.com
+    if url.startswith("//"):
+        url = f"https:{url}"
+        
+    # CHANGED: Repair single-slash schemes like 'http:/example.com'
+    if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:/[^/]", url):
+        url = url.replace(":/", "://", 1)
+    
     parsed = urlparse(url)
+    
     if not parsed.scheme:
-        # Assume http if scheme is missing
-        parsed = urlparse(f"http://{url}")
-    if not parsed.scheme or not parsed.netloc:
-        raise ValueError("URL must include scheme and host")
+        # Assume http if scheme is missing // Richard: Assume https instead
+        parsed = urlparse(f"https://{url}")
+    
+    # CHANGED: if scheme exists but netloc is empty (e.g., 'http:///google.com' or 'https:/google.com'),
+    # move first path segment into netloc and normalize path to '/'
+    if parsed.scheme and not parsed.netloc and parsed.path:
+        candidate = parsed.path.lstrip("/")
+        host_part, _, rest = candidate.partition("/")
+        parsed = parsed._replace(netloc=host_part, path="/" + rest if rest else "/")
+    
+    # Richard: Commented out for now
+    # if not parsed.scheme or not parsed.netloc:
+    #     raise ValueError("URL must include scheme and host")
+    
     scheme = parsed.scheme.lower()
     host = parsed.hostname.lower() if parsed.hostname else ""
 
@@ -84,6 +105,7 @@ def normalize_url(url: str) -> Tuple[str, str, str, Optional[str], str]:
         default_port = (scheme == "http" and parsed.port == 80) or (scheme == "https" and parsed.port == 443)
         if not default_port:
             netloc = f"{host}:{parsed.port}"
+    
     normalized = urlunparse((scheme, netloc, parsed.path or "/", "", parsed.query, ""))
 
     ext = tldextract.extract(host)
