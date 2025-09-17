@@ -7,7 +7,7 @@ from app.core.normalization import normalize_url
 from app.domain.entities import UrlRisk
 from app.infrastructure.repositories import SqlAlchemyUrlRiskRepository
 from app.services.llm_service import LLMRiskService
-from app.infrastructure.llm import llm_session
+from app.infrastructure.llm import get_llm_session
 
 class UrlRiskService:
     RISK_BAND_CONVERSION = {"SAFE": 1, "LOW RISK": 2, "MEDIUM RISK": 3, "UNSAFE": 4}
@@ -15,7 +15,7 @@ class UrlRiskService:
     def __init__(self, session: Session):
         self.session = session
         self.repo = SqlAlchemyUrlRiskRepository(session)
-        self.llm_svc: LLMRiskService = LLMRiskService(llm_session)
+        self.llm_svc: LLMRiskService = LLMRiskService(get_llm_session())
 
     def _ml_evaluate(self, url: str):
         # Soft risk scoring then conversion to discrete levels (0, 1, 2, 3 for Safe-Unsafe)

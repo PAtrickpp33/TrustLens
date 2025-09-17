@@ -1,8 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import logging
 
 from app.core.config import settings
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from app.api.routes_mobile import router as mobile_router
 from app.api.routes_email import router as email_router
@@ -23,6 +28,10 @@ app = FastAPI(
     ),
 )
 
+logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+logger.info(f"Environment: {settings.app_env}")
+logger.info(f"Debug mode: {settings.app_debug}")
+
 # CORS (temporary): allow all origins, methods, and headers for frontend access
 app.add_middleware(
     CORSMiddleware,
@@ -32,12 +41,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": settings.app_name, "version": settings.app_version}
+
+@app.get("/")
+async def root():
+    return {"message": f"Welcome to {settings.app_name}", "version": settings.app_version, "docs": "/docs"}
+
 # Routers
-app.include_router(mobile_router, prefix="/api/v1", tags=["mobile"])
-app.include_router(email_router, prefix="/api/v1", tags=["email"])
-app.include_router(url_router, prefix="/api/v1", tags=["url"])
-app.include_router(articles_router, prefix="/api/v1", tags=["articles"])
-app.include_router(llm_router, prefix="/api/v1", tags=["llm"])
+try:
+    app.include_router(mobile_router, prefix="/api/v1", tags=["mobile"])
+    logger.info("Mobile router loaded")
+    app.include_router(email_router, prefix="/api/v1", tags=["email"])
+    logger.info("Email router loaded")
+    app.include_router(url_router, prefix="/api/v1", tags=["url"])
+    logger.info("URL router loaded")
+    app.include_router(articles_router, prefix="/api/v1", tags=["articles"])
+    logger.info("Articles router loaded")
+    app.include_router(llm_router, prefix="/api/v1", tags=["llm"])
+    logger.info("LLM router loaded")
+    logger.info("All routers loaded successfully")
+except Exception as e:
+    logger.error(f"Error loading routers: {e}")
+    raise
 
 
 # Global error handling to unify response format
