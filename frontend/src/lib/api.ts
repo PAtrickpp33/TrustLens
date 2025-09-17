@@ -84,21 +84,25 @@ export type UrlScoreResponse = {
   risk_band: RiskBand;  // derived from score on the server
 };
 
-// Matches RecommendResponse (extends ScoreResponse + llm payload)
-export type UrlRecommendResponse = UrlScoreResponse & {
-  llm: {
-    risk_band: RiskBand;                 // echoed for convenience
-    action: LLMAction;                   // server-enforced action
-    confidence_note: string;
-    evidence: string;
-    recommended_next_steps: string[];    // up to 4 items
-    user_safe_message: string;
-    notes_for_analyst: string;
-  };
-};
+// Make the llm block its own, fixed shape
+export type LLMDecision = {
+  risk_band: RiskBand;                 // echoed for convenience
+  action: LLMAction;                   // server-enforced action
+  confidence_note: string;
+  evidence: string;
+  recommended_next_steps: string[];    // up to 4 items
+  user_safe_message: string;
+  notes_for_analyst: string;
+}
+
+// Make the recommend response forgiving:
+// - score fields become optional (Partial<UrlScoreResponse>)
+// - accept any extra fields (index signature)
+export type UrlRecommendResponse = Partial<UrlScoreResponse> & {
+  llm: LLMDecision;
+} & Record<string, unknown>;
 
 // URL check request to backend API
-
 export async function checkUrl(url: string, timeoutMs = 12000): Promise<UrlRiskData> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
@@ -340,6 +344,13 @@ export async function llmScoreUrl(url: string, timeoutMs = 12_000): Promise<UrlS
   return json.data
 }
 
+// Richard: To ensure that response has AI-generated recommendations
+function assertHasLLM(x: any): asserts x is { llm: LLMDecision } {
+  if (!x?.llm || typeof x.llm !== "object") {
+    throw new Error("Malformed API response: missing `llm`");
+  }
+}
+
 // Richard: For AI-generated recommendations based on URL score
 export async function llmRecommendUrl(url: string, timeoutMs = 12_000): Promise<UrlRecommendResponse> {
   const controller = new AbortController()
@@ -370,5 +381,9 @@ export async function llmRecommendUrl(url: string, timeoutMs = 12_000): Promise<
   if (!json?.success || !json?.data) {
     throw new Error((json as any)?.error ?? "Unexpected API response")
   }
-  return json.data
+
+  // Richard: Runtime validation check
+  const data = json.data as any
+  assertHasLLM(data)
+  return data as UrlRecommendResponse
 }
