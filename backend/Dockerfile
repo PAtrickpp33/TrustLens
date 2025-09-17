@@ -19,7 +19,9 @@ RUN apt-get update \
 
 # Install Python dependencies into a staging prefix
 COPY requirements.txt ./
+COPY AI_model/requirements.txt ./AI_model_requirements.txt
 RUN pip install --prefix=/install -r requirements.txt
+RUN pip install --prefix=/install -r AI_model_requirements.txt
 
 
 FROM python:3.11-slim
@@ -39,6 +41,7 @@ COPY --from=builder /install /usr/local
 # Copy application source
 COPY app ./app
 COPY sql ./sql
+COPY AI_model ./AI_model
 
 # Create non-root user for security
 RUN useradd -m -u 10001 appuser \
