@@ -25,15 +25,15 @@ class UrlSetNotesRequest(BaseModel):
     url: str = Field(..., description="Full URL with scheme")
     notes: str | None = Field(default=None, max_length=512)
 
-
+# Richard: Changed risk level range to 0,1,2,3,4 
 class UrlSetRiskLevelRequest(BaseModel):
     url: str = Field(..., description="Full URL with scheme")
-    risk_level: int = Field(..., ge=0, le=3)
+    risk_level: int = Field(..., ge=0, le=4)
 
-
+# Richard: Changed risk level range to 0,1,2,3,4 
 class UrlImportItem(BaseModel):
     url: str
-    risk_level: int | None = Field(default=None, ge=0, le=3)
+    risk_level: int | None = Field(default=None, ge=0, le=4)
     phishing_flag: int | None = Field(default=None, ge=0, le=1)
     notes: str | None = Field(default=None, max_length=512)
 

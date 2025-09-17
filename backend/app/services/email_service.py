@@ -17,7 +17,7 @@ class EmailRiskService:
         local, domain, addr = normalize_email(address)
         entity = self.repo.get_by_address(addr)
         if entity is None:
-            entity = self.repo.upsert_report(address=addr, local_part=local, domain=domain, source=None, notes=None, risk_level=0, mx_valid=0, disposable=0)
+            entity = self.repo.create_or_update(address=addr, local_part=local, domain=domain, source=None, notes=None, risk_level=0, mx_valid=0, disposable=0)
             self.session.commit()
         return entity
 
@@ -59,7 +59,7 @@ class EmailRiskService:
             summary["total"] += 1
             try:
                 local, domain, addr = normalize_email(address)
-                self.repo.upsert_report(address=addr, local_part=local, domain=domain, source=None, notes=notes, risk_level=risk_level, mx_valid=mx_valid, disposable=disposable)
+                self.repo.create_or_update(address=addr, local_part=local, domain=domain, source=None, notes=notes, risk_level=risk_level, mx_valid=mx_valid, disposable=disposable)
                 summary["succeeded"] += 1
             except Exception as e:
                 summary["failed"] += 1

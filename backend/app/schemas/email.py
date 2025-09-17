@@ -26,15 +26,15 @@ class EmailSetNotesRequest(BaseModel):
     address: str = Field(..., description="Email address")
     notes: str | None = Field(default=None, max_length=512)
 
-
+# Richard: Changed risk level range to 0,1,2,3,4 
 class EmailSetRiskLevelRequest(BaseModel):
     address: str = Field(..., description="Email address")
-    risk_level: int = Field(..., ge=0, le=3)
+    risk_level: int = Field(..., ge=0, le=4)
 
-
+# Richard: Changed risk level range to 0,1,2,3,4 
 class EmailImportItem(BaseModel):
     address: str
-    risk_level: int | None = Field(default=None, ge=0, le=3)
+    risk_level: int | None = Field(default=None, ge=0, le=4)
     notes: str | None = Field(default=None, max_length=512)
     mx_valid: int | None = Field(default=None, ge=0, le=1)
     disposable: int | None = Field(default=None, ge=0, le=1)
