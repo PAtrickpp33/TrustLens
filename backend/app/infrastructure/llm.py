@@ -22,3 +22,5 @@ class LLMSession:
 def get_llm_session():
     session: LLMSession = LLMSession()
     return session
+
+llm_session = get_llm_session()
