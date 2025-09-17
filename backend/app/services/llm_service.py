@@ -1,4 +1,5 @@
 import json, urllib.parse as up
+import re
 from typing import Dict, Any
 from fastapi import HTTPException
 from google.genai import types
@@ -155,7 +156,8 @@ class LLMRiskService:
             except Exception:
                 pass
 
-        raise ValueError(f"Model did not return JSON. Got: {s[:500].replace('\\n',' ')}")
+        snippet = s[:500].replace("\n", " ")
+        raise ValueError(f"Model did not return JSON. Got: {snippet}")
 
     @staticmethod
     def _ensure_fields(out: Dict[str, Any]) -> Dict[str, Any]:
