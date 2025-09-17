@@ -1,6 +1,10 @@
 // src/components/LlmRecommendationCard.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Button, message } from "antd";
+import { Flag, CheckCircle2 } from "lucide-react";
 import type { UrlRecommendResponse } from "@/lib/api";
+import { reportUrl } from "@/lib/api";
 import { AlertOctagon, AlertTriangle, AlertCircle, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -59,6 +63,11 @@ function bandToUi(bandRaw: string): Ui {
 }
 
 export default function LlmRecommendationCard({ data }: Props) {
+  // --- new state for reporting UX (ported from RiskCard) ---
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [isReported, setIsReported] = useState(false);
+
   const band = data?.llm?.risk_band || data?.risk_band || "SAFE";
   const ui = bandToUi(band);
   const { Icon } = ui;
@@ -67,7 +76,30 @@ export default function LlmRecommendationCard({ data }: Props) {
     .replace(/_/g, " ")
     .replace(/\b\w/g, c => c.toUpperCase()); // "allow_with_warning" -> "Allow With Warning"
 
-  const displayUrl = data.ascii_safe_url || data.url;
+  // display vs. report URL
+  const displayUrl = data.url || data.ascii_safe_url;
+  const reportableUrl = data.url || data.ascii_safe_url; // prefer raw if present
+  const canReport = typeof reportableUrl === "string" && reportableUrl.length > 0;
+
+  async function onReportClick() {
+    if (!canReport) {
+      message.error("No URL available to report");
+      return;
+    }
+    setReportError(null);
+    setIsReporting(true);
+    try {
+      await reportUrl(reportableUrl as string);
+      message.success("Report successful");
+      setIsReported(true);
+    } catch (e: any) {
+      const err = e?.message ?? "Failed to report";
+      setReportError(err);
+      message.error(err);
+    } finally {
+      setIsReporting(false);
+    }
+  }
 
   return (
     <Card className={`mt-4 border-2 ${ui.border}`}>
@@ -117,6 +149,24 @@ export default function LlmRecommendationCard({ data }: Props) {
         {data.llm?.confidence_note && (
           <p className="text-xs text-muted-foreground">{data.llm.confidence_note}</p>
         )}
+        
+        {/* Report button row (ported from RiskCard) */}
+        <div className="flex items-center gap-2 pt-2">
+          <Button
+            type={isReported ? "default" : "primary"}
+            size="small"
+            icon={isReported ? <CheckCircle2 size={16} /> : <Flag size={16} />}
+            loading={isReporting}
+            disabled={isReported || isReporting || !canReport}
+            onClick={onReportClick}
+          >
+            {isReported ? "Reported" : isReporting ? "Reporting..." : "Report"}
+          </Button>
+          {reportError ? (
+            <span className="text-xs text-red-600">{reportError}</span>
+          ) : null}
+        </div>
+        
       </CardContent>
     </Card>
   );
