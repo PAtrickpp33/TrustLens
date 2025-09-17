@@ -15,14 +15,14 @@ def main():
 
     # Reformat DF to address, risk_level, notes, mx_valid, and disposable cols
     email_data = email_data[["address", "risk_level"]].copy()
-    email_data["notes"] = ""
+    email_data["notes"] = None
     email_data["mx_valid"] = 0
     email_data["disposable"] = 0
 
     # Convert to JSON array [{record 1}, {record 2}, ...]
     email_records = email_data.to_dict(orient="records")
     
-    email_batches = chunk_records(email_records, chunk_size=500)
+    email_batches = chunk_records(email_records, chunk_size=10)
 
     # Send POST request to API to update remote DB
     batch_post(email_batches, API_URL, verbose=True)

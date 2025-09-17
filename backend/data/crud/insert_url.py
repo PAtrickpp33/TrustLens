@@ -21,7 +21,7 @@ def main():
     # Convert to JSON array [{record 1}, {record 2}, ...]
     url_records = url_data.to_dict(orient="records")
     
-    url_batches = chunk_records(url_records[:10], chunk_size=500)
+    url_batches = chunk_records(url_records[:10], chunk_size=10)
 
     # Send POST request to API to update remote DB
     batch_post(url_batches, API_URL, verbose=True)
