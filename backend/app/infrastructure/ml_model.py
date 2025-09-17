@@ -3,15 +3,27 @@ import torch
 from app.core.config import llm_settings
 
 # ======== Encoders & Dynamic URLNet builder ========
-from AI_model.encoders_from_notebook import enc_char_url, enc_words, enc_token_chars  # 你的编码器
-from AI_model.modeldef_from_notebook import build_urlnet_from_state_dict             # 动态搭建模型
+# Import these only when needed to avoid startup failures
+# from AI_model.encoders_from_notebook import enc_char_url, enc_words, enc_token_chars
+# from AI_model.modeldef_from_notebook import build_urlnet_from_state_dict
 
-META_PATH = llm_settings.meta_path
-WEIGHT_PATH = llm_settings.weight_path
+def get_model_paths():
+    """Get model paths with error handling"""
+    try:
+        return llm_settings.meta_path, llm_settings.weight_path
+    except Exception as e:
+        print(f"Warning: Could not get model paths: {e}")
+        return "AI_model/meta.json", "AI_model/urlnet_model.bin"
 
 # ======== URLNet Wrapper ========
 class URLScorer:
-    def __init__(self, meta_path: str = META_PATH, weights_path: str = WEIGHT_PATH):
+    def __init__(self, meta_path: str = None, weights_path: str = None):
+        # Import here to avoid startup issues
+        from AI_model.encoders_from_notebook import enc_char_url, enc_words, enc_token_chars
+        from AI_model.modeldef_from_notebook import build_urlnet_from_state_dict
+        
+        if meta_path is None or weights_path is None:
+            meta_path, weights_path = get_model_paths()
         with open(meta_path, "r", encoding="utf-8") as f:
             meta = json.load(f)
         self.CHAR2ID = meta["CHAR2ID"]
@@ -30,11 +42,16 @@ class URLScorer:
 
         self.model = build_urlnet_from_state_dict(self.CHAR2ID, self.WORD2ID, self.TOKCHAR2ID, sd)
         self.model.eval()
+        
+        # Store encoder functions for use in score method
+        self.enc_char_url = enc_char_url
+        self.enc_words = enc_words
+        self.enc_token_chars = enc_token_chars
 
     def score(self, url: str) -> float:
-        x_char = torch.tensor([enc_char_url(url, self.CHAR2ID, max_len=self.MAX_LEN)], dtype=torch.long)
-        x_word = torch.tensor([enc_words(url, self.WORD2ID, max_words=self.MAX_WORDS)], dtype=torch.long)
-        x_tokc = torch.tensor([enc_token_chars(url, self.TOKCHAR2ID,
+        x_char = torch.tensor([self.enc_char_url(url, self.CHAR2ID, max_len=self.MAX_LEN)], dtype=torch.long)
+        x_word = torch.tensor([self.enc_words(url, self.WORD2ID, max_words=self.MAX_WORDS)], dtype=torch.long)
+        x_tokc = torch.tensor([self.enc_token_chars(url, self.TOKCHAR2ID,
                                                max_words=self.MAX_WORDS, max_tok_char=self.MAX_TOK_CHAR)],
                               dtype=torch.long)
         with torch.no_grad():
