@@ -122,8 +122,8 @@ class UrlRiskService:
             registrable_domain=registrable,
             source=existing.source if existing else source,
             notes=existing.notes if existing else notes, # Keep preexisting notes if available
-            risk_level=entity.risk_level if entity else (risk_level if risk_level else 2), # Keep preexisting risk level if available, otherwise use passed risk_level; fallback is 0
-            phishing_flag=1 if risk_level > 2 else 0,
+            risk_level=existing.risk_level if existing else (risk_level if risk_level else 2), # Keep preexisting risk level if available, otherwise use passed risk_level; fallback is 2
+            phishing_flag=1 if (risk_level or 0) > 2 else 0,
         )
         self.session.commit()
         return entity, False

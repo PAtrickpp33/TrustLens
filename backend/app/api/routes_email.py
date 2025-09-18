@@ -63,6 +63,13 @@ def scamcheck_email(payload: EmailCheckRequest,
                 address=payload.address, 
                 risk_level=risk_level_llm if risk_level_db==0 else risk_level_db, 
                 notes=notes_llm)
+            # Additionally record this AI evaluation as a report entry for persistence/analytics
+            entity, _ = db_svc.report(
+                address=payload.address,
+                source="ai_model",
+                notes=notes_llm,
+                risk_level=risk_level_llm,
+            )
     
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
