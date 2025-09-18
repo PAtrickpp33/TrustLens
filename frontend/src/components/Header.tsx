@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
             Dashboard
           </NavLink>
           <NavLink to="/overview" className="nav-link" onClick={closeMenu}>
-            Overview
+            Insights
           </NavLink>
           {/*<NavLink to="/features" className="nav-link" onClick={closeMenu}>
             Quiz
@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
             Dashboard
           </NavLink>
           <NavLink to="/overview" className="nav-link" onClick={closeMenu}>
-            Overview
+            Insights
           </NavLink>
           {/*<NavLink to="/features" className="nav-link" onClick={closeMenu}>
             Quiz
