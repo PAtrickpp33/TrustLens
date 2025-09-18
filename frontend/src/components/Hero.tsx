@@ -77,8 +77,8 @@ export function Hero() {
           </Typography.Title>
 
           <Typography.Paragraph className="hero-sub">
-            Protect yourself online by checking URLs, email addresses, and phone
-            numbers for potential threats. Get instant security analysis with
+            Protect yourself online by checking URLs and email addresses
+             for potential threats. Get instant security analysis with
             detailed explanations.
           </Typography.Paragraph>
         </div>
@@ -90,7 +90,7 @@ export function Hero() {
               <span>Security Scanner</span>
             </div>
             <div className="hero-card-desc">
-              Enter a URL, email address, or phone number to check for security threats
+              Enter a URL or email address to check for security threats
             </div>
 
             <Tabs
