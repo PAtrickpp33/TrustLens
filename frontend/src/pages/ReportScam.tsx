@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { reportUrl, reportEmail, reportMobile } from "@/lib/api";
+
 
 const COLORS = {
   text: "#0f172a",
@@ -16,60 +18,70 @@ const COLORS = {
 export default function ReportScam() {
   const [params] = useSearchParams();
   const initialType = (params.get("type") ?? "url") as "url" | "email" | "sms" | "phone";
-  const [type] = useState(initialType); 
-  const [value, setValue] = useState("");
+  const initialValue = params.get("value") ?? "";
+
+  const [type, setType] = useState(initialType);
+  const [value, setValue] = useState(initialValue);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const nav = useNavigate();
 
+  useEffect(() => {
+    setType((params.get("type") ?? "url") as any);
+    setValue(params.get("value") ?? "");
+  }, [params]);
+
   const validate = () => {
-    if (type !== "url") return "Only URL is supported in this iteration.";
-    try {
-      const u = new URL(value);
-      if (!/^https?:/.test(u.protocol)) throw new Error("Invalid protocol");
-      return null;
-    } catch {
-      return "Please enter a valid URL that starts with https://";
+    if (type === "url") {
+      try {
+        const u = new URL(value);
+        if (!/^https?:/.test(u.protocol)) throw new Error("Invalid protocol");
+        return null;
+      } catch {
+        return "Please enter a valid URL that starts with https://";
+      }
     }
+    if (type === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Please enter a valid email address";
+      return null;
+    }
+    if (type === "phone" || type === "sms") {
+      if (!value.trim()) return "Please enter a valid number/message";
+      return null;
+    }
+    return null;
   };
 
   const submit = async () => {
-    setErr(null);
-    setOk(null);
+  setErr(null);
+  setOk(null);
 
-    const v = validate();
-    if (v) {
-      setErr(v);
-      return;
+  const v = validate();
+  if (v) { setErr(v); return; }
+
+  setLoading(true);
+  try {
+    if (type === "url") {
+      await reportUrl(value);
+    } else if (type === "email") {
+      await reportEmail(value);
+    } else {
+      await reportMobile({ e164: value });
     }
 
-    setLoading(true);
-    try {
-      const res = await fetch("/api/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "url",
-          value,
-          idempotencyKey: `${value}|${new Date().toISOString().slice(0, 10)}`,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
+    setOk("Thanks! Your report was added to our moderation queue.");
 
-      if (!res.ok) throw new Error(data?.message || "Failed to submit report");
+    const ref = encodeURIComponent(`${type}:${value}`.slice(0, 40));
+    setTimeout(() => nav(`/report/success?ref=${ref}`), 650);
 
-      // inline
-      setOk("Thanks! Your report was added to our moderation queue.");
-      
-      const ref = encodeURIComponent(data?.report_id || "RPT-XXXX");
-      setTimeout(() => nav(`/report/success?ref=${ref}`), 650);
-    } catch (e: any) {
-      setErr(e.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (e: any) {
+    setErr(e?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") submit();
@@ -78,12 +90,11 @@ export default function ReportScam() {
   /* ------- UI ------- */
   return (
     <main style={{ background: "#f8fafc" }}>
-      {/* HERO  */}
+      {/* HERO */}
       <div
         style={{
           padding: "64px 20px 36px",
-          background:
-            "linear-gradient(90deg, rgba(37,99,235,.12), rgba(6,182,212,.12))",
+          background: "linear-gradient(90deg, rgba(37,99,235,.12), rgba(6,182,212,.12))",
           borderBottom: `1px solid ${COLORS.border}`,
         }}
       >
@@ -115,8 +126,7 @@ export default function ReportScam() {
             Report a Scam
           </h1>
           <p style={{ marginTop: 6, color: COLORS.sub, maxWidth: 720 }}>
-            Submit a suspicious link. We run a quick safety check before adding
-            it to the moderation queue.
+            Submit a suspicious link, email or number. We run a quick safety check before adding it to the moderation queue.
           </p>
         </div>
       </div>
@@ -189,8 +199,7 @@ export default function ReportScam() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background:
-                    "linear-gradient(135deg, #e0e7ff, #f5d0fe)",
+                  background: "linear-gradient(135deg, #e0e7ff, #f5d0fe)",
                   boxShadow: "inset 0 0 0 5px #eef2ff",
                   color: COLORS.brandA,
                   fontWeight: 700,
@@ -202,10 +211,16 @@ export default function ReportScam() {
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={onKey}
-                placeholder="https://example.com/login"
-                inputMode="url"
+                placeholder={
+                  type === "email"
+                    ? "name@example.com"
+                    : type === "phone"
+                    ? "+61412345678"
+                    : "https://example.com/login"
+                }
+                inputMode={type === "url" ? "url" : "text"}
                 autoComplete="off"
-                aria-label="Suspicious URL"
+                aria-label="Suspicious value"
                 style={{
                   width: "100%",
                   padding: "14px 14px 14px 52px",
@@ -239,29 +254,6 @@ export default function ReportScam() {
           <div style={{ marginTop: 8, color: "#64748b", fontSize: 13 }}>
             We don’t store personal data. Reports help improve ScamCheck for everyone.
           </div>
-        </div>
-
-        
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 12,
-            marginTop: 18,
-          }}
-        >
-          <Hint
-            title="Tip"
-            body="Paste a full URL starting with https://"
-          />
-          <Hint
-            title="What happens next?"
-            body="We run a quick evaluation and add it to a moderation queue."
-          />
-          <Hint
-            title="Privacy"
-            body="Your IP is hashed; no personal data is stored."
-          />
         </div>
       </section>
     </main>
