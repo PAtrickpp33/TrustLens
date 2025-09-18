@@ -37,7 +37,7 @@ def check_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get_
 @router.post("/email/report", summary="Report an email as risky")
 def report_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get_email_service)):
     try:
-        entity = svc.report(address=payload.address)
+        entity, already = svc.report(address=payload.address, source="user_report")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -49,6 +49,7 @@ def report_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get
         "report_count": entity.report_count,
         "source": entity.source,
         "notes": entity.notes,
+        "already_reported": already,
     })
 
 

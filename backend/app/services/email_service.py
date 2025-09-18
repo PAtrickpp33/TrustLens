@@ -1,11 +1,18 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Tuple
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.core.normalization import normalize_email
 from app.domain.entities import EmailRisk
 from app.infrastructure.repositories import SqlAlchemyEmailRiskRepository
+
+
+def _same_utc_day(a: datetime | None, b: datetime | None) -> bool:
+    if not a or not b:
+        return False
+    return a.astimezone(timezone.utc).date() == b.astimezone(timezone.utc).date()
 
 
 class EmailRiskService:
@@ -17,15 +24,53 @@ class EmailRiskService:
         local, domain, addr = normalize_email(address)
         entity = self.repo.get_by_address(addr)
         if entity is None:
-            entity = self.repo.create_or_update(address=addr, local_part=local, domain=domain, source=None, notes=None, risk_level=0, mx_valid=0, disposable=0)
+            entity = self.repo.create_or_update(
+                address=addr,
+                local_part=local,
+                domain=domain,
+                source=None,
+                notes=None,
+                risk_level=0,
+                mx_valid=0,
+                disposable=0,
+            )
             self.session.commit()
         return entity
 
-    def report(self, *, address: str, risk_level: int = 2, source: str = "user_report", notes: Optional[str] = None, mx_valid: int = 0, disposable: int = 0) -> EmailRisk:
+    def report(
+        self,
+        *,
+        address: str,
+        source: str = "user_report",
+        notes: Optional[str] = None,
+        mx_valid: int = 0,
+        disposable: int = 0,
+    ) -> Tuple[EmailRisk, bool]:
+        """
+        Report an email as risky.
+        Returns (entity, already_reported_today)
+        """
         local, domain, addr = normalize_email(address)
-        entity = self.repo.upsert_report(address=addr, local_part=local, domain=domain, source=source, notes=notes, risk_level=risk_level, mx_valid=mx_valid, disposable=disposable)
+        existing = self.repo.get_by_address(addr)
+        now = datetime.now(timezone.utc)
+
+        # اگر امروز قبلا گزارش شده باشد، دوباره نمی‌شماریم
+        if existing and _same_utc_day(existing.last_reported_at, now):
+            return existing, True
+
+        # در غیر این صورت گزارش را ثبت/افزایش می‌کنیم
+        entity = self.repo.upsert_report(
+            address=addr,
+            local_part=local,
+            domain=domain,
+            source=source,
+            notes=notes,
+            risk_level=2,  # پیش‌فرض
+            mx_valid=mx_valid,
+            disposable=disposable,
+        )
         self.session.commit()
-        return entity
+        return entity, False
 
     def set_is_deleted(self, *, address: str, is_deleted: int) -> bool:
         _, _, addr = normalize_email(address)
@@ -49,17 +94,22 @@ class EmailRiskService:
         return updated
 
     def batch_import(self, items: list[tuple[str, int | None, str | None, int | None, int | None]]) -> dict:
-        """Batch import emails.
-
-        items: list of tuples (address, risk_level, notes, mx_valid, disposable)
-        returns summary dict
-        """
+        """Batch import emails: (address, risk_level, notes, mx_valid, disposable)"""
         summary = {"total": 0, "succeeded": 0, "failed": 0, "errors": []}
         for address, risk_level, notes, mx_valid, disposable in items:
             summary["total"] += 1
             try:
                 local, domain, addr = normalize_email(address)
-                self.repo.create_or_update(address=addr, local_part=local, domain=domain, source=None, notes=notes, risk_level=risk_level, mx_valid=mx_valid, disposable=disposable)
+                self.repo.create_or_update(
+                    address=addr,
+                    local_part=local,
+                    domain=domain,
+                    source=None,
+                    notes=notes,
+                    risk_level=risk_level,
+                    mx_valid=mx_valid,
+                    disposable=disposable,
+                )
                 summary["succeeded"] += 1
             except Exception as e:
                 summary["failed"] += 1

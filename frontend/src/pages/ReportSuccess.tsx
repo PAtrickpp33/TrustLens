@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 export default function ReportSuccess() {
   const [params] = useSearchParams();
   const ref = decodeURIComponent(params.get("ref") || "RPT-XXXX");
+  const already = params.get("already") === "true";
 
   return (
     <main
@@ -26,34 +27,47 @@ export default function ReportSuccess() {
           textAlign: "center",
         }}
       >
-        {/* success icon */}
+        {/* success / info icon */}
         <div
           style={{
             width: 88,
             height: 88,
             margin: "0 auto 18px",
             borderRadius: "50%",
-            background: "#eafff3",
+            background: already ? "#fff7ed" : "#eafff3",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "inset 0 0 0 10px #f3fff8",
+            boxShadow: already ? "inset 0 0 0 10px #fff3e0" : "inset 0 0 0 10px #f3fff8",
           }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            style={{ width: 44, height: 44, color: "#16a34a" }}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
+          {already ? (
+            <svg
+              viewBox="0 0 24 24"
+              style={{ width: 44, height: 44, color: "#ea580c" }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              style={{ width: 44, height: 44, color: "#16a34a" }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          )}
         </div>
 
-        {/* heading */}
         <h1
           style={{
             margin: 0,
@@ -64,7 +78,7 @@ export default function ReportSuccess() {
             color: "#0f172a",
           }}
         >
-          Thanks for your report!
+          {already ? "Already reported today" : "Thanks for your report!"}
         </h1>
 
         {/* reference pill */}
@@ -89,14 +103,13 @@ export default function ReportSuccess() {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "#22c55e",
+              background: already ? "#f97316" : "#22c55e",
               display: "inline-block",
             }}
           />
           <span>Reference:&nbsp;{ref}</span>
         </div>
 
-        {/* subtitle */}
         <p
           style={{
             margin: "16px auto 0",
@@ -106,8 +119,17 @@ export default function ReportSuccess() {
             lineHeight: 1.6,
           }}
         >
-          Your submission was added to our moderation queue. We’ll use it to
-          improve <strong>ScamCheck</strong>.
+          {already ? (
+            <>
+              This entry was already submitted earlier today, so we didn’t count it again.
+              Your effort still helps improve <strong>ScamCheck</strong>—thank you!
+            </>
+          ) : (
+            <>
+              Your submission was added to our moderation queue. We’ll use it to improve{" "}
+              <strong>ScamCheck</strong>.
+            </>
+          )}
         </p>
 
         {/* actions */}
@@ -120,13 +142,12 @@ export default function ReportSuccess() {
             flexWrap: "wrap",
           }}
         >
-          {/* Primary button (gradient) */}
           <Link
             to="/"
             style={{
               padding: "12px 24px",
               borderRadius: 14,
-              background: "linear-gradient(90deg,#2563eb,#06b6d4)", // blue → cyan
+              background: "linear-gradient(90deg,#2563eb,#06b6d4)",
               color: "#ffffff",
               fontWeight: 600,
               fontSize: 15,
@@ -136,19 +157,16 @@ export default function ReportSuccess() {
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 16px rgba(37,99,235,0.45)";
+              e.currentTarget.style.boxShadow = "0 6px 16px rgba(37,99,235,0.45)";
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 12px rgba(37,99,235,0.35)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(37,99,235,0.35)";
             }}
           >
             Back to ScamCheck
           </Link>
 
-          {/* Secondary button (soft) */}
           <Link
             to="/report"
             style={{
