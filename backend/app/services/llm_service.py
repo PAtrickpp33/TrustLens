@@ -10,7 +10,7 @@ from app.infrastructure.llm import LLMSession
 from app.schemas.llm import GenerateResponseInput
 
 # Stored system_prompt in separate textfile for maintainability
-SYSTEM_PROMPT = Path(__file__).with_name("prompt_url_legacy.txt").read_text(encoding="utf-8")
+SYSTEM_PROMPT = (Path(__file__).parent / "prompts/prompt_url_legacy.txt").read_text(encoding="utf-8")
 
 # Richard: I changed risk band to Safe, Low Risk, Medium Risk, and Unsafe
 # Build a proper Schema for the JSON response
@@ -30,8 +30,8 @@ def _recommendation_schema() -> types.Schema:
     )
 
 # New system prompt for simpler responses
-URL_RESPONSE_PROMPT = Path(__file__).with_name("prompt_url.txt").read_text(encoding="utf-8")
-EMAIL_ADDR_RESPONSE_PROMPT = Path(__file__).with_name("prompt_email_addr.txt").read_text(encoding="utf-8")
+URL_RESPONSE_PROMPT = (Path(__file__).parent / "prompts/prompt_url.txt").read_text(encoding="utf-8")
+EMAIL_ADDR_RESPONSE_PROMPT = (Path(__file__).parent / "prompts/prompt_email_addr.txt").read_text(encoding="utf-8")
 
 # Unified response schema
 RESPONSE_SCHEMA = types.Schema(
