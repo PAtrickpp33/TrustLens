@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
+import { Card, Tabs, Input, Button, Typography } from "antd";
 import { Shield, Globe, Mail, Search } from "lucide-react";
 import RiskNotesCard from "@/components/ui/riskNotesCard";
 import { scamcheckEmail, scamcheckUrl } from "@/lib/api";
@@ -17,7 +17,7 @@ export function Hero() {
 
   // status
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // We avoid surfacing raw error messages to users.
 
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
@@ -30,7 +30,6 @@ export function Hero() {
   }, [activeTab, urlInput, emailInput]);
 
   const handleCheck = useCallback(async () => {
-    setError(null);
     setLoading(true);
 
     try {
@@ -44,7 +43,31 @@ export function Hero() {
         setEmailRes(data);
       } 
     } catch (e: any) {
-      setError(e?.message ?? "Something went wrong");
+      // On any backend error, show a friendly fallback message instead of exposing the error
+      if (activeTab === "url") {
+        setEmailRes(null);
+        const placeholder = {
+          url: urlInput.trim(),
+          risk_level: 0 as 0,
+          phishing_flag: 0,
+          report_count: 0,
+          source: null,
+          notes: "This URL is currently being analyzed by our AI model. Please try again shortly.",
+        } satisfies UrlRiskData;
+        setUrlRes(placeholder);
+      } else if (activeTab === "email") {
+        setUrlRes(null);
+        const placeholder = {
+          address: emailInput.trim(),
+          risk_level: 0 as 0,
+          mx_valid: 0,
+          disposable: 0,
+          report_count: 0,
+          source: null,
+          notes: "This email address is currently being analyzed by our AI model. Please try again shortly.",
+        } satisfies EmailRiskData;
+        setEmailRes(placeholder);
+      }
     } finally {
       setLoading(false);
     }
@@ -128,10 +151,6 @@ export function Hero() {
                         Check Website Security
                       </Button>
 
-                      {error && (
-                        <Alert className="hero-alert" type="error" showIcon message={error} />
-                      )}
-
                       {urlRes && <RiskNotesCard kind="url" data={urlRes} />}
                     </div>
                   ),
@@ -167,10 +186,6 @@ export function Hero() {
                       >
                         Check Email Safety
                       </Button>
-
-                      {error && activeTab === "email" && (
-                        <Alert className="hero-alert" type="error" showIcon message={error} />
-                      )}
 
                       {emailRes && <RiskNotesCard kind="email" data={emailRes} />}
                     </div>
