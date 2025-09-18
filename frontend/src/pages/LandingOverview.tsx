@@ -96,7 +96,7 @@ export default function LandingOverview() {
           backgroundImage:`linear-gradient(90deg, ${THEME.primaryDark}, ${THEME.primary}, ${THEME.secondary})`,
           WebkitBackgroundClip:'text', color:'transparent'
         }}>
-          TrustLens Insight
+          TrustLens Insights
         </h1>
         <p style={{margin:'6px 0 10px', color:THEME.textMuted, fontSize:12}}>
           Key statistics and trends at a glance—scans, detections, risk distribution, and recent cases.
