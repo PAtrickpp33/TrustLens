@@ -4,7 +4,7 @@ import { RootLayout } from '@/layouts/RootLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-import Quiz from '@/pages/Quiz';
+//import Quiz from '@/pages/Quiz';
 import ScamCheck from '@/pages/ScamCheck';
 import AboutUs from '@/pages/AboutUs';
 import Results from '@/pages/Results';
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
       { path: 'report', element: <ReportScam /> },
       { path: 'report/success', element: <ReportSuccess /> },
 
-      { path: 'features', element: <Quiz /> },
+      //{ path: 'features', element: <Quiz /> },
       { path: 'about', element: <AboutUs /> },
       { path: 'landing', element: <LandingDashboard /> },
       { path: 'overview', element: <LandingOverview /> },
