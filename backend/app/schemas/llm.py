@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Literal
 
 # ======== Schemas ========
 class ScoreRequest(BaseModel):
@@ -18,7 +18,7 @@ class Recommendation(BaseModel):
     risk_band: str
     action: str
     confidence_note: str
-    evidence: str # List[str]
+    evidence: str
     recommended_next_steps: List[str]
     user_safe_message: str
     notes_for_analyst: str
@@ -29,3 +29,6 @@ class RecommendResponse(BaseModel):
     score: float
     risk_band: str
     llm: Recommendation
+    
+class GenerateResponseInput(BaseModel):
+    type: Literal["url", "email address", "mobile number", "email", "sms"]

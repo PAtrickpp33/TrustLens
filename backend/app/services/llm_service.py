@@ -7,10 +7,10 @@ from pathlib import Path
 
 # Import LLM session from infra
 from app.infrastructure.llm import LLMSession
+from app.schemas.llm import GenerateResponseInput
 
 # Stored system_prompt in separate textfile for maintainability
-PROMPT_PATH = Path(__file__).with_name("system_prompt.txt")
-SYSTEM_PROMPT = PROMPT_PATH.read_text(encoding="utf-8")
+SYSTEM_PROMPT = Path(__file__).with_name("prompt_url_legacy.txt").read_text(encoding="utf-8")
 
 # Richard: I changed risk band to Safe, Low Risk, Medium Risk, and Unsafe
 # Build a proper Schema for the JSON response
@@ -29,11 +29,28 @@ def _recommendation_schema() -> types.Schema:
         required=["risk_band","action","confidence_note","evidence","recommended_next_steps","user_safe_message","notes_for_analyst"],
     )
 
+# New system prompt for simpler responses
+URL_RESPONSE_PROMPT = Path(__file__).with_name("prompt_url.txt").read_text(encoding="utf-8")
+EMAIL_ADDR_RESPONSE_PROMPT = Path(__file__).with_name("prompt_email_addr.txt").read_text(encoding="utf-8")
+
+# Unified response schema
+RESPONSE_SCHEMA = types.Schema(
+    type="object",
+    properties={
+        "risk_level": types.Schema(type="string", enum=["1", "2", "3", "4"]),
+        "response": types.Schema(type="string")
+    },
+    required=["risk_level", "response"]
+)
+
 class LLMRiskService:
     RISKLVL_TO_RISKBAND = {0: "UNKNOWN", 1: "SAFE", 2: "LOW RISK", 3: "MEDIUM RISK", 4: "UNSAFE"}
     
     def __init__(self, session: LLMSession):
         self.session = session
+        self.client = self.session.client
+        # Grounding Gemini responses via web search
+        self.grounding_tool = types.Tool(google_search=types.GoogleSearch())
     
     # Helper functions
     def risk_band(self, score: float) -> str:
@@ -205,6 +222,30 @@ class LLMRiskService:
     #             pass
     #         raise HTTPException(status_code=502, detail=f"Gemini call failed: {e}")
     
+    def generate_risk_level_and_response(self, user_prompt: str, input: GenerateResponseInput):
+        prompt_hashmap = {
+            "url": URL_RESPONSE_PROMPT,
+            "email address": EMAIL_ADDR_RESPONSE_PROMPT
+        }
+        system_instruction = prompt_hashmap.get(input.type.lower(), None)
+        try: 
+            resp = self.client.models.generate_content(
+                model=self.session.model,
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    max_output_tokens=max(512, self.session.MAX_TOKENS), # 512 as minimum number of tokens
+                    temperature=self.session.TEMP,
+                    response_mime_type="application/json",
+                    response_schema=RESPONSE_SCHEMA,
+                    thinking_config=types.ThinkingConfig(thinking_budget=self.session.THINKING_BUDGET) # Allows model to think
+                )
+            )
+            txt = resp.text or ""
+            return self._robust_extract_json(txt)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"Gemini call failed: {e}")
+    
     def call_gemini_json(self, user_prompt: str) -> Dict[str, Any]:
         def _try_parse_from_response(resp) -> Dict[str, Any] | None:
             # CHANGED: unified parse attempts from .text and parts
@@ -239,8 +280,8 @@ class LLMRiskService:
                     temperature=self.session.TEMP,
                     response_mime_type="application/json",
                     response_schema=_recommendation_schema(),
-                    thinking_config=types.ThinkingConfig(thinking_budget=self.session.THINKING_BUDGET),
-                ),
+                    thinking_config=types.ThinkingConfig(thinking_budget=self.session.THINKING_BUDGET)
+                )
             )
             parsed = _try_parse_from_response(resp)
             if parsed is not None:
@@ -270,9 +311,9 @@ class LLMRiskService:
                     system_instruction="You are a JSON converter. Output only JSON.",
                     max_output_tokens=self.session.MAX_TOKENS,
                     temperature=0.0,
-                    response_mime_type="application/json",
+                    response_mime_type="application/json"
                     # CHANGED: no response_schema / thinking_config on the repair call to avoid incompatibilities
-                ),
+                )
             )
             parsed2 = _try_parse_from_response(resp2)
             if parsed2 is not None:
