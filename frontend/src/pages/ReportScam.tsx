@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { reportEmail, reportUrl } from "@/lib/api";
 
 type Kind = "email" | "url";
 
@@ -75,6 +76,12 @@ export default function ReportScam() {
   const submit = async () => {
     setErr(null);
     setOk(null);
+    if (kind === "url") {
+      reportUrl(value)
+    }
+    else if (kind === "email") {
+      reportEmail(value)
+    }
 
     const problem = validate();
     if (problem) {

@@ -13,6 +13,7 @@ from app.schemas.url import (
 )
 from app.services.url_service import UrlRiskService
 from app.services.llm_service import LLMRiskService
+from app.schemas.llm import GenerateResponseInput
 
 router = APIRouter()
 
@@ -69,6 +70,47 @@ def evaluate_url(payload: UrlCheckRequest,
         "notes": entity.notes,
         "llm": normalized_out,
     })
+    
+@router.post("/url/scamcheck", summary="Perform ScamCheck evaluation on URL and return an intelligent response.")
+def scamcheck_url(payload: UrlCheckRequest, 
+                  db_svc: UrlRiskService = Depends(get_url_service),
+                  llm_svc: LLMRiskService = Depends(get_llm_service)):
+    try:
+        # Get can return either UrlRisk or None
+        entity = db_svc.get(url=payload.url)
+        
+        # When entity not in database or not memoized, then generate LLM response and update database
+        # When notes are present, then it means there's a previously generated AI response we can query
+        if entity is None or entity.risk_level == 0 or entity.notes is None:
+            risk_level_db = 0 if entity is None else entity.risk_level
+            prompt = (
+                f"URL: {payload.url}\n"
+                f"RISK_LEVEL: {risk_level_db}\n"
+            )
+            
+            # Generate a risk level and response from LLM; coerce risk level to int from str
+            resp = llm_svc.generate_risk_level_and_response(prompt, GenerateResponseInput(type="email address"))
+            risk_level_llm = int(resp.get("risk_level", 0))
+            notes_llm = resp.get("response", None)
+            
+            # Now update the database with risk_level and notes
+            # Only update risk level when it's previously unknown
+            entity = db_svc.upsert(
+                url=payload.url, 
+                risk_level=risk_level_llm if risk_level_db==0 else risk_level_db, 
+                notes=notes_llm)
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return ApiResponse(success=True, data={
+        "url": entity.full_url,
+        "risk_level": entity.risk_level, # Should be updated by AI generated risk level
+        "phishing_flag": entity.phishing_flag,
+        "report_count": entity.report_count,
+        "source": entity.source,
+        "notes": entity.notes # This should be the AI generated notes now
+    })
 
 
 @router.post("/url/set_deleted", summary="Set soft delete flag for a URL")
@@ -111,9 +153,11 @@ def import_urls(payload: UrlBatchImportRequest, svc: UrlRiskService = Depends(ge
 
 
 @router.post("/url/report", summary="Report a URL as risky")
-def report_url(payload: UrlCheckRequest, svc: UrlRiskService = Depends(get_url_service)):
+def report_url(payload: UrlCheckRequest, db_svc: UrlRiskService = Depends(get_url_service), llm_svc: LLMRiskService = Depends(get_llm_service)):
     try:
-        entity, already = svc.report(url=payload.url)
+        # Perform a scamcheck first before we report
+        entity = scamcheck_url(payload, db_svc=db_svc, llm_svc=llm_svc)
+        entity, already = db_svc.report(url=payload.url)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.deps import get_email_service
+from app.api.deps import get_email_service, get_llm_service
 from app.schemas import ApiResponse
 from app.schemas.email import (
     EmailCheckRequest,
@@ -12,6 +12,8 @@ from app.schemas.email import (
     EmailBatchImportRequest,
 )
 from app.services.email_service import EmailRiskService
+from app.services.llm_service import LLMRiskService
+from app.schemas.llm import GenerateResponseInput
 
 router = APIRouter()
 
@@ -32,12 +34,55 @@ def check_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get_
         "source": entity.source,
         "notes": entity.notes,
     })
+    
+@router.post("/email/scamcheck", summary="Perform ScamCheck evaluation on email and return an intelligent response.")
+def scamcheck_email(payload: EmailCheckRequest, 
+                  db_svc: EmailRiskService = Depends(get_email_service),
+                  llm_svc: LLMRiskService = Depends(get_llm_service)):
+    try:
+        # Get can return either EmailRisk or None
+        entity = db_svc.get(address=payload.address)
+        
+        # When entity not in database or not memoized, then generate LLM response and update database
+        # When notes are present, then it means there's a previously generated AI response we can query
+        if entity is None or entity.risk_level == 0 or entity.notes is None:
+            risk_level_db = 0 if entity is None else entity.risk_level
+            prompt = (
+                f"ADDRESS: {payload.address}\n"
+                f"RISK_LEVEL: {risk_level_db}\n"
+            )
+            
+            # Generate a risk level and response from LLM; coerce risk level to int from str
+            resp = llm_svc.generate_risk_level_and_response(prompt, GenerateResponseInput(type="email address"))
+            risk_level_llm = int(resp.get("risk_level", 0))
+            notes_llm = resp.get("response", None)
+            
+            # Now update the database with risk_level and notes
+            # Only update risk level when it's previously unknown
+            entity = db_svc.upsert(
+                address=payload.address, 
+                risk_level=risk_level_llm if risk_level_db==0 else risk_level_db, 
+                notes=notes_llm)
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
+    return ApiResponse(success=True, data={
+        "address": entity.address,
+        "risk_level": entity.risk_level,
+        "mx_valid": entity.mx_valid,
+        "disposable": entity.disposable,
+        "report_count": entity.report_count,
+        "source": entity.source,
+        "notes": entity.notes
+    })
 
 @router.post("/email/report", summary="Report an email as risky")
-def report_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get_email_service)):
+def report_email(payload: EmailCheckRequest, db_svc: EmailRiskService = Depends(get_email_service), llm_svc = Depends(get_llm_service)):
     try:
-        entity, already = svc.report(address=payload.address, source="user_report")
+        # Perform email address scamcheck first
+        entity = scamcheck_email(payload, db_svc=db_svc, llm_svc=llm_svc)
+        entity, already = db_svc.report(address=payload.address, source="user_report")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -51,7 +96,6 @@ def report_email(payload: EmailCheckRequest, svc: EmailRiskService = Depends(get
         "notes": entity.notes,
         "already_reported": already,
     })
-
 
 @router.post("/email/set_deleted", summary="Set soft delete flag for an email")
 def set_email_deleted(payload: EmailSetDeletedRequest, svc: EmailRiskService = Depends(get_email_service)):

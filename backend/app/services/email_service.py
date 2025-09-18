@@ -20,6 +20,38 @@ class EmailRiskService:
         self.session = session
         self.repo = SqlAlchemyEmailRiskRepository(session)
 
+    def get(self, *, address: str):
+        _, _, addr = normalize_email(address)
+        entity = self.repo.get_by_address(addr)
+        return entity
+    
+    def upsert(self, address: str, **kwargs):
+        local, domain, addr = normalize_email(address)
+        # kwargs should override the default values if provided
+        payload = {
+            "address": addr,
+            "local_part": local,
+            "domain": domain,
+            "source": None,
+            "notes": None,
+            "risk_level": 0,
+            "mx_valid": 0,
+            "disposable": 0,
+        }
+        payload.update(kwargs)
+        entity = self.repo.create_or_update(
+            address=payload["address"],
+            local_part=payload["local_part"],
+            domain=payload["domain"],
+            source=payload["source"],
+            notes=payload["notes"],
+            risk_level=payload["risk_level"] if payload["risk_level"] in [0,1,2,3,4] else 0,
+            mx_valid=payload["mx_valid"],
+            disposable=payload["disposable"],
+        )
+        self.session.commit()
+        return entity
+    
     def check_or_create(self, *, address: str) -> EmailRisk:
         local, domain, addr = normalize_email(address)
         entity = self.repo.get_by_address(addr)
@@ -41,11 +73,12 @@ class EmailRiskService:
         self,
         *,
         address: str,
-        source: str = "user_report",
-        notes: Optional[str] = None,
         mx_valid: int = 0,
         disposable: int = 0,
-    ) -> Tuple[EmailRisk, bool]:
+        source: str = "user_report",
+        notes: Optional[str] = None,
+        risk_level: Optional[int] = None
+        ) -> Tuple[EmailRisk, bool]:
         """
         Report an email as risky.
         Returns (entity, already_reported_today)
@@ -63,11 +96,11 @@ class EmailRiskService:
             address=addr,
             local_part=local,
             domain=domain,
-            source=source,
-            notes=notes,
-            risk_level=2,  # پیش‌فرض
-            mx_valid=mx_valid,
-            disposable=disposable,
+            source=existing.source if existing else source,
+            notes=existing.notes if existing else notes,
+            risk_level=existing.risk_level if existing else (risk_level if risk_level else 2),  # پیش‌فرض
+            mx_valid=existing.mx_valid if existing else mx_valid,
+            disposable=existing.disposable if existing else disposable,
         )
         self.session.commit()
         return entity, False
