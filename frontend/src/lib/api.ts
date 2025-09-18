@@ -387,3 +387,67 @@ export async function llmRecommendUrl(url: string, timeoutMs = 12_000): Promise<
   assertHasLLM(data)
   return data as UrlRecommendResponse
 }
+
+// Robust URL check request with LLM integration
+export async function scamcheckUrl(url: string, timeoutMs = 12000): Promise<UrlRiskData> {
+  const controller = new AbortController()
+  const t = setTimeout(() => controller.abort(), timeoutMs)
+
+  const res = await fetch(`${URL_BASE}/scamcheck`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error")
+  })
+  clearTimeout(t)
+
+  if (!res.ok) {
+    const maybeJson = await res.text().catch(() => "")
+    try {
+      const j = JSON.parse(maybeJson)
+      throw new Error(j?.detail ?? `HTTP ${res.status}`)
+    } catch {
+      throw new Error(`HTTP ${res.status}`)
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<UrlRiskData>
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response")
+  }
+  return json.data
+}
+
+// Robust URL check request with LLM integration
+export async function scamcheckEmail(address: string, timeoutMs = 12000): Promise<EmailRiskData> {
+  const controller = new AbortController()
+  const t = setTimeout(() => controller.abort(), timeoutMs)
+
+  const res = await fetch(`${EMAIL_BASE}/scamcheck`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error")
+  })
+  clearTimeout(t)
+
+  if (!res.ok) {
+    const maybeJson = await res.text().catch(() => "")
+    try {
+      const j = JSON.parse(maybeJson)
+      throw new Error(j?.detail ?? `HTTP ${res.status}`)
+    } catch {
+      throw new Error(`HTTP ${res.status}`)
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<EmailRiskData>
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response")
+  }
+  return json.data
+}

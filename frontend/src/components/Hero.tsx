@@ -1,10 +1,9 @@
 import { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Alert } from "antd";
 import { Shield, Globe, Mail, Search } from "lucide-react";
-import RiskCard from "./riskCard";
-import LlmRecommendationCard from "@/components/ui/llmRecommendationCard";
-import { checkEmail, llmRecommendUrl } from "@/lib/api";
-import type { UrlRecommendResponse, EmailRiskData } from "@/lib/api";
+import RiskNotesCard from "@/components/ui/riskNotesCard";
+import { scamcheckEmail, scamcheckUrl } from "@/lib/api";
+import type { UrlRiskData, EmailRiskData } from "@/lib/api";
 import "./Hero.css";
 
 type Tab = "url" | "email" ;
@@ -21,7 +20,7 @@ export function Hero() {
   const [error, setError] = useState<string | null>(null);
 
   // results
-  const [urlRes, setUrlRes] = useState<UrlRecommendResponse | null>(null);
+  const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
   const [emailRes, setEmailRes] = useState<EmailRiskData | null>(null);
 
   const canSubmit = useMemo(() => {
@@ -37,11 +36,11 @@ export function Hero() {
     try {
       if (activeTab === "url") {
         setEmailRes(null);
-        const data = await llmRecommendUrl(urlInput.trim());
+        const data = await scamcheckUrl(urlInput.trim());
         setUrlRes(data);
       } else if (activeTab === "email") {
         setUrlRes(null);
-        const data = await checkEmail(emailInput.trim());
+        const data = await scamcheckEmail(emailInput.trim());
         setEmailRes(data);
       } 
     } catch (e: any) {
@@ -112,7 +111,7 @@ export function Hero() {
                       <Input
                         id="url-input"
                         size="large"
-                        placeholder="https://example.com"
+                        placeholder="'https://www.trustlens.me' or 'www.trustlens.me'"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                         onKeyDown={onEnter}
@@ -133,7 +132,7 @@ export function Hero() {
                         <Alert className="hero-alert" type="error" showIcon message={error} />
                       )}
 
-                      {urlRes && <LlmRecommendationCard data={urlRes} />}
+                      {urlRes && <RiskNotesCard kind="url" data={urlRes} />}
                     </div>
                   ),
                 },
@@ -173,7 +172,7 @@ export function Hero() {
                         <Alert className="hero-alert" type="error" showIcon message={error} />
                       )}
 
-                      {emailRes && <RiskCard kind="email" data={emailRes} />}
+                      {emailRes && <RiskNotesCard kind="email" data={emailRes} />}
                     </div>
                   ),
                 }
