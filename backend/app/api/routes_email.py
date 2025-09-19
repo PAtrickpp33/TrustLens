@@ -57,7 +57,7 @@ def scamcheck_email(payload: EmailCheckRequest,
             risk_level_llm = int(resp.get("risk_level", 0))
             notes_llm = resp.get("response", None)
             
-            # Now update the database with risk_level and notes
+            # Persist AI evaluation directly into DB notes/risk_level
             # Only update risk level when it's previously unknown
             entity = db_svc.upsert(
                 address=payload.address, 
