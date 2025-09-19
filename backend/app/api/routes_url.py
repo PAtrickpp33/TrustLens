@@ -89,7 +89,7 @@ def scamcheck_url(payload: UrlCheckRequest,
             )
             
             # Generate a risk level and response from LLM; coerce risk level to int from str
-            resp = llm_svc.generate_risk_level_and_response(prompt, GenerateResponseInput(type="email address"))
+            resp = llm_svc.generate_risk_level_and_response(prompt, GenerateResponseInput(type="url"))
             risk_level_llm = int(resp.get("risk_level", 0))
             notes_llm = resp.get("response", None)
             
@@ -97,14 +97,14 @@ def scamcheck_url(payload: UrlCheckRequest,
             # Only update risk level when it's previously unknown
             entity = db_svc.upsert(
                 url=payload.url, 
-                risk_level=risk_level_llm if risk_level_db==0 else risk_level_db, 
+                risk_level=max(risk_level_llm, risk_level_db), # Get the maximum risk level assessment between database and LLM
                 notes=notes_llm)
             # Additionally record this AI evaluation as a report entry for persistence/analytics
             entity, _ = db_svc.report(
                 url=payload.url,
                 source="ai_model",
                 notes=notes_llm,
-                risk_level=risk_level_llm,
+                risk_level=max(risk_level_llm, risk_level_db) # Get the maximum risk level assessment between database and LLM
             )
     
     except ValueError as e:
