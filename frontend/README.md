@@ -26,3 +26,7 @@ Backend integration
 - HTTP client adds `Authorization: Bearer <token>` if present in `useSessionStore`.
 - Update `src/services/*` endpoints to match backend contracts.
 
+trustlens.me
+iteration1.trustlens.me
+iteration2.trustlens.me
+https://iteration3.trustlens.me/
