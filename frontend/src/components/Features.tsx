@@ -34,14 +34,14 @@ const features: FeatureItem[] = [
     title: "Instant Analysis",
     description:
       "Get security results in seconds with our high-performance scanning engine that processes millions of queries daily.",
-    to: "/", // ScamCheck
+    to: "/scamcheck", // we will scroll-to-top instead of navigating if needed
   },
   {
     icon: Globe,
     title: "Report a Scam",
     description:
       "Report suspicious websites, emails, or phone numbers. Every report strengthens ScamCheck and helps protect more people.",
-    to: "/report?type=url", // 👈 Epic 4: Report a Scam
+    to: "/report?type=url",
   },
   {
     icon: AlertTriangle,
@@ -69,16 +69,29 @@ const features: FeatureItem[] = [
 export function Features() {
   const navigate = useNavigate();
 
+  const scrollToTop = () =>
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const handleClick = (to?: string) => {
+    if (!to) return;
+    // For home or scamcheck, just scroll to top (no route change)
+    if (to === "/" || to === "/scamcheck") {
+      scrollToTop();
+      return;
+    }
+    navigate(to);
+  };
+
   const handleKey = (e: React.KeyboardEvent, to?: string) => {
     if (!to) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
+      if (to === "/" || to === "/scamcheck") {
+        scrollToTop();
+        return;
+      }
       navigate(to);
     }
-  };
-
-  const handleClick = (to?: string) => {
-    if (to) navigate(to);
   };
 
   const ctaLabel = (to?: string) => {
@@ -86,7 +99,7 @@ export function Features() {
     if (to.startsWith("/overview#")) return "View in Overview →";
     if (to === "/overview") return "Open Overview →";
     if (to.startsWith("/about")) return "Read policy →";
-    if (to === "/") return "Try ScamCheck →";
+    if (to === "/scamcheck" || to === "/") return "Try ScamCheck →";
     if (to.startsWith("/report")) return "Report a scam →";
     return "Open →";
   };
@@ -95,7 +108,9 @@ export function Features() {
     <section id="features" className="feat-root">
       <div className="feat-container">
         <div className="feat-head">
-          <Title level={2} className="feat-title">Powerful Security ScamCheck</Title>
+          <Title level={2} className="feat-title">
+            Powerful Security ScamCheck
+          </Title>
           <Paragraph className="feat-sub">
             Comprehensive protection against online threats with advanced detection capabilities
             and real-time security intelligence.
@@ -113,7 +128,7 @@ export function Features() {
                   bordered
                   hoverable={isLink}
                   onClick={() => handleClick(f.to)}
-                  role={isLink ? "button" : undefined}
+                  role={isLink ? "link" : undefined}
                   tabIndex={isLink ? 0 : -1}
                   onKeyDown={(e) => handleKey(e, f.to)}
                   bodyStyle={{ padding: 20 }}
