@@ -4,9 +4,26 @@ import { Shield, Globe, Mail, Search } from "lucide-react";
 import RiskNotesCard from "@/components/ui/riskNotesCard";
 import { scamcheckEmail, scamcheckUrl } from "@/lib/api";
 import type { UrlRiskData, EmailRiskData } from "@/lib/api";
+import { UsageCounter } from "@/components/UsageCounter";
 import "./Hero.css";
 
-type Tab = "url" | "email" ;
+type Tab = "url" | "email";
+
+/** Minimal inline privacy note (plain language + link). */
+function PrivacyNoteInline() {
+  return (
+    <div
+      className="hero-privacy-note"
+      role="note"
+      aria-label="Privacy notice"
+      style={{ marginTop: 8, fontSize: 12, color: "#475569" }}
+    >
+      We don’t store your input. Checks run momentarily; only anonymous totals are kept.{" "}
+      <a href="/about#governance-policy">Privacy & Governance</a>
+
+    </div>
+  );
+}
 
 export function Hero() {
   const [activeTab, setActiveTab] = useState<Tab>("url");
@@ -17,7 +34,6 @@ export function Hero() {
 
   // status
   const [loading, setLoading] = useState(false);
-  // We avoid surfacing raw error messages to users.
 
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
@@ -31,19 +47,18 @@ export function Hero() {
 
   const handleCheck = useCallback(async () => {
     setLoading(true);
-
     try {
       if (activeTab === "url") {
         setEmailRes(null);
         const data = await scamcheckUrl(urlInput.trim());
         setUrlRes(data);
-      } else if (activeTab === "email") {
+      } else {
         setUrlRes(null);
         const data = await scamcheckEmail(emailInput.trim());
         setEmailRes(data);
-      } 
-    } catch (e: any) {
-      // On any backend error, show a friendly fallback message instead of exposing the error
+      }
+    } catch {
+      // Friendly fallbacks (don’t leak backend errors)
       if (activeTab === "url") {
         setEmailRes(null);
         const placeholder = {
@@ -52,10 +67,11 @@ export function Hero() {
           phishing_flag: 0,
           report_count: 0,
           source: null,
-          notes: "This URL is currently being analyzed by our AI model. Please try again shortly.",
+          notes:
+            "This URL is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies UrlRiskData;
         setUrlRes(placeholder);
-      } else if (activeTab === "email") {
+      } else {
         setUrlRes(null);
         const placeholder = {
           address: emailInput.trim(),
@@ -64,7 +80,8 @@ export function Hero() {
           disposable: 0,
           report_count: 0,
           source: null,
-          notes: "This email address is currently being analyzed by our AI model. Please try again shortly.",
+          notes:
+            "This email address is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies EmailRiskData;
         setEmailRes(placeholder);
       }
@@ -100,9 +117,14 @@ export function Hero() {
 
           <Typography.Paragraph className="hero-sub">
             Protect yourself online by checking URLs and email addresses
-             for potential threats. Get instant security analysis with
+            for potential threats. Get instant security analysis with
             detailed explanations.
           </Typography.Paragraph>
+
+          {/* Above-the-fold legitimacy signal (AC 11.1.1) */}
+          <div className="hero-usage" style={{ marginTop: 8 }}>
+            <UsageCounter />
+          </div>
         </div>
 
         <div className="hero-card-wrap">
@@ -139,6 +161,10 @@ export function Hero() {
                         onChange={(e) => setUrlInput(e.target.value)}
                         onKeyDown={onEnter}
                       />
+
+                      {/* Privacy note directly under the input (US 11.2.1) */}
+                      <PrivacyNoteInline />
+
                       <Button
                         type="primary"
                         size="large"
@@ -175,6 +201,10 @@ export function Hero() {
                         onChange={(e) => setEmailInput(e.target.value)}
                         onKeyDown={onEnter}
                       />
+
+                      {/* Privacy note directly under the input (US 11.2.1) */}
+                      <PrivacyNoteInline />
+
                       <Button
                         type="primary"
                         size="large"
@@ -190,7 +220,7 @@ export function Hero() {
                       {emailRes && <RiskNotesCard kind="email" data={emailRes} />}
                     </div>
                   ),
-                }
+                },
               ]}
             />
           </Card>

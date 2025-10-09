@@ -28,7 +28,14 @@ export default function AboutUs() {
   const year = new Date().getFullYear();
 
   return (
-    <section style={{ padding: "2.5rem 1.5rem", maxWidth: 1100, margin: "0 auto", color: COLORS.text }}>
+    <section
+      style={{
+        padding: "2.5rem 1.5rem",
+        maxWidth: 1100,
+        margin: "0 auto",
+        color: COLORS.text,
+      }}
+    >
       {/* HERO */}
       <div
         style={{
@@ -85,8 +92,8 @@ export default function AboutUs() {
               fontSize: 15,
             }}
           >
-            TrustLens helps people recognise scams, understand online risks, and act with confidence —
-            using clear explanations, practical education, and transparent checks.
+            TrustLens helps people recognise scams, understand online risks, and act with
+            confidence — using clear explanations, practical education, and transparent checks.
           </p>
 
           <div
@@ -103,26 +110,46 @@ export default function AboutUs() {
       </div>
 
       {/* WHAT WE DO */}
-      <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, margin: "2rem 0 0.75rem", color: "#1E3A8A" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          fontSize: "1.5rem",
+          fontWeight: 700,
+          margin: "2rem 0 0.75rem",
+          color: "#1E3A8A",
+        }}
+      >
         What We Do
       </h2>
 
       <div style={grid(18, 280)}>
-        <GradientCard gradient={GRADS.blueCyan} icon="🛡️" title="Risk Checks"
-          body="Quick checks for URLs, emails, and phone numbers with plain-language explanations." />
-        <GradientCard gradient={GRADS.indigoBlue} icon="📘" title="Education Hub"
-          body="Red flags by category and bite-size guides you can trust." />
-        <GradientCard gradient={GRADS.skyCyan} icon="🧾" title="Case Studies"
-          body="Real incidents distilled into 3–5 key lessons." />
+        <GradientCard
+          gradient={GRADS.blueCyan}
+          icon="🛡️"
+          title="Risk Checks"
+          body="Quick checks for URLs, emails, and phone numbers with plain-language explanations."
+        />
+        <GradientCard
+          gradient={GRADS.indigoBlue}
+          icon="📘"
+          title="Education Hub"
+          body="Red flags by category and bite-size guides you can trust."
+        />
+        <GradientCard
+          gradient={GRADS.skyCyan}
+          icon="🧾"
+          title="Case Studies"
+          body="Real incidents distilled into 3–5 key lessons."
+        />
       </div>
 
       {/* MISSION + HOW */}
       <div style={grid(18, 320, "2.25rem")}>
         <PanelColored title="Our Mission" bar={GRADS.blueCyan}>
           <p style={{ marginTop: 0, marginBottom: 12 }}>
-            Empower every user — regardless of technical background — to make informed, confident choices when
-            facing suspicious content. We combine public data, curated heuristics, and explainable checks
-            to provide guidance, not just a binary verdict.
+            Empower every user — regardless of technical background — to make informed, confident
+            choices when facing suspicious content. We combine public data, curated heuristics, and
+            explainable checks to provide guidance, not just a binary verdict.
           </p>
           <ul style={ul()}>
             <li>Reduce harm from phishing, impersonation, and fraud.</li>
@@ -133,39 +160,75 @@ export default function AboutUs() {
 
         <PanelColored title="How TrustLens Works" bar={GRADS.indigoBlue}>
           <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
-            <li><b>Check:</b> Parse input (URL/email/number) → enrich with open datasets → evaluate risk signals.</li>
-            <li><b>Explain:</b> Show why it’s flagged, confidence hints, and next-step advice.</li>
-            <li><b>Learn:</b> Short tips that build long-term judgment beyond the tool.</li>
+            <li>
+              <b>Check:</b> Parse input (URL/email/number) → enrich with open datasets → evaluate
+              risk signals.
+            </li>
+            <li>
+              <b>Explain:</b> Show why it’s flagged, confidence hints, and next-step advice.
+            </li>
+            <li>
+              <b>Learn:</b> Short tips that build long-term judgment beyond the tool.
+            </li>
           </ol>
         </PanelColored>
       </div>
 
       {/* GOVERNANCE */}
-      <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, margin: "1.5rem 0 0.75rem", color: "#1E3A8A" }}>
+      <h2
+        id="governance-policy"          // ← anchor target for /about#governance-policy
+        tabIndex={-1}                   // ← allows focus after scroll (a11y)
+        style={{
+          scrollMarginTop: 80,          // ← offset for sticky header (adjust as needed)
+          textAlign: "center",
+          fontSize: "1.5rem",
+          fontWeight: 700,
+          margin: "1.5rem 0 0.75rem",
+          color: "#1E3A8A",
+        }}
+      >
         Governance & Policies
       </h2>
 
       <div style={grid(18, 280)}>
-        <GradientCard gradient={GRADS.blueCyan} icon="🔒" title="Privacy by Design"
-          body={<ul style={ul()}>
-            <li>Minimal data collection; no selling of personal data.</li>
-            <li>Client-side redaction for emails/IDs where feasible.</li>
-            <li>Limited retention strictly for security/quality.</li>
-          </ul>} />
+        <GradientCard
+          gradient={GRADS.blueCyan}
+          icon="🔒"
+          title="Privacy by Design"
+          body={
+            <ul style={ul()}>
+              <li>Minimal data collection; no selling of personal data.</li>
+              <li>Client-side redaction for emails/IDs where feasible.</li>
+              <li>Limited retention strictly for security/quality.</li>
+            </ul>
+          }
+        />
 
-        <GradientCard gradient={GRADS.indigoBlue} icon="💾" title="Data Handling & Storage"
-          body={<ul style={ul()}>
-            <li>TLS in transit; encryption at rest.</li>
-            <li>Least-privilege access controls.</li>
-            <li>Audit trails for admin and system changes.</li>
-          </ul>} />
+        <GradientCard
+          gradient={GRADS.indigoBlue}
+          icon="💾"
+          title="Data Handling & Storage"
+          body={
+            <ul style={ul()}>
+              <li>TLS in transit; encryption at rest.</li>
+              <li>Least-privilege access controls.</li>
+              <li>Audit trails for admin and system changes.</li>
+            </ul>
+          }
+        />
 
-        <GradientCard gradient={GRADS.skyCyan} icon="📊" title="Model & Heuristics Transparency"
-          body={<ul style={ul()}>
-            <li>Explainable rules alongside ML/LMM components.</li>
-            <li>Versioned checks + release notes for material changes.</li>
-            <li>Human-review loop for contested results.</li>
-          </ul>} />
+        <GradientCard
+          gradient={GRADS.skyCyan}
+          icon="📊"
+          title="Model & Heuristics Transparency"
+          body={
+            <ul style={ul()}>
+              <li>Explainable rules alongside ML/LMM components.</li>
+              <li>Versioned checks + release notes for material changes.</li>
+              <li>Human-review loop for contested results.</li>
+            </ul>
+          }
+        />
       </div>
 
       {/* ACCORDIONS */}
@@ -178,7 +241,9 @@ export default function AboutUs() {
             <li>Australian Consumer Law — fair, accurate, non-misleading representations.</li>
             <li>Terms/licensing of referenced datasets and APIs.</li>
           </ul>
-          <p style={{ fontSize: 12, color: COLORS.sub, marginBottom: 0 }}>Informational only — not legal advice.</p>
+          <p style={{ fontSize: 12, color: COLORS.sub, marginBottom: 0 }}>
+            Informational only — not legal advice.
+          </p>
         </Accordion>
 
         <Accordion title="Scope, Limitations & Fair-Use">
@@ -200,9 +265,26 @@ export default function AboutUs() {
       </div>
 
       {/* FOOTER */}
-      <div style={{ marginTop: 28, paddingTop: 12, textAlign: "center", fontSize: 13, color: COLORS.sub }}>
-        <div style={{ margin: "0 auto 10px", height: 4, width: 120, borderRadius: 999, backgroundImage: GRADS.blueCyan }} />
-        © {year} <span style={{ fontWeight: 600, color: "#1E3A8A" }}>TrustLens</span> — Educational use only • hello@trustlens.app
+      <div
+        style={{
+          marginTop: 28,
+          paddingTop: 12,
+          textAlign: "center",
+          fontSize: 13,
+          color: COLORS.sub,
+        }}
+      >
+        <div
+          style={{
+            margin: "0 auto 10px",
+            height: 4,
+            width: 120,
+            borderRadius: 999,
+            backgroundImage: GRADS.blueCyan,
+          }}
+        />
+        © {year} <span style={{ fontWeight: 600, color: "#1E3A8A" }}>TrustLens</span> — Educational
+        use only • hello@trustlens.app
       </div>
     </section>
   );
@@ -317,7 +399,15 @@ function Accordion({ title, children }: React.PropsWithChildren<{ title: string 
         {title}
         <span style={{ float: "right", color: "#2563EB" }}>▼</span>
       </summary>
-      <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: 16, fontSize: 14, lineHeight: 1.7, color: COLORS.text }}>
+      <div
+        style={{
+          borderTop: `1px solid ${COLORS.border}`,
+          padding: 16,
+          fontSize: 14,
+          lineHeight: 1.7,
+          color: COLORS.text,
+        }}
+      >
         {children}
       </div>
     </details>
