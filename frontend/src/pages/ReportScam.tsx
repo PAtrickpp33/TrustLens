@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Card, Button, Select, Input, Alert, Typography, Collapse } from "antd";
+import type { InputRef } from "antd";
 import { reportEmail, reportUrl } from "@/lib/api";
 import { CheckCircle2, Sparkles, ShieldCheck, Lock, Clock } from "lucide-react";
 import "./ReportScam.css";
@@ -36,7 +37,7 @@ export default function ReportScam() {
   const [communityCount, setCommunityCount] = useState<number | undefined>(undefined);
 
   const formRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<InputRef>(null);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, []);
   useEffect(() => setValue(prefill), [prefill]);
