@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Card, Button, Select, Input, Alert, Typography, Collapse } from "antd";
+import type { InputRef } from "antd";
 import { reportEmail, reportUrl } from "@/lib/api";
 
 type Kind = "email" | "url";
@@ -27,7 +28,7 @@ export default function ReportScam() {
   const [reported, setReported] = useState(false);
 
   const formRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<InputRef>(null);
 
   useEffect(() => setValue(prefill), [prefill]);
 
