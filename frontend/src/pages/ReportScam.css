@@ -356,7 +356,7 @@ a.report-badge:focus-visible{
 }
 .report-callout svg{ color:#0ea5e9; flex:0 0 auto; }
 
-/* موبایل: اجازه‌ی چندخط طبیعی */
+/* mobile */
 @media (max-width: 540px){
   .report-callout{ font-size: 15px; }
 }
