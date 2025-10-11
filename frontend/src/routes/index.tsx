@@ -41,11 +41,11 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <ScamCheck /> },
 
-      // 👉 Epic 4
+      //  this part for Epic 4
       { path: 'report', element: <ReportScam /> },
       { path: 'report/success', element: <ReportSuccess /> },
 
-      { path: 'features', element: <Quiz /> },
+      { path: 'features', element: <Quiz /> }, // for epic 10
       { path: 'about', element: <AboutUs /> },
       { path: 'landing', element: <LandingDashboard /> },
       { path: 'overview', element: <LandingOverview /> },
