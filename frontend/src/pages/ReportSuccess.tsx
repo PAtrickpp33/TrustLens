@@ -122,7 +122,7 @@ export default function ReportSuccess() {
           {already ? (
             <>
               This entry was already submitted earlier today, so we didn’t count it again.
-              Your effort still helps improve <strong>ScamCheck</strong>—thank you!
+              Your effort still helps improve <strong>ScamCheck</strong> Thank you!
             </>
           ) : (
             <>

@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 
-// --- Props: showReportButton پیش‌فرض false تا دکمهٔ کوچک حذف شود
+// --- Props: showReportButton false
 type Props =
   | ({ kind: "url";    data: UrlRiskData }  | { kind: "email";  data: EmailRiskData } | { kind: "mobile"; data: MobileRiskData })
   & { className?: string; showReportButton?: boolean };
@@ -35,7 +35,7 @@ function levelToUi(level: 0 | 1 | 2 | 3 | 4): Ui {
 }
 
 export default function RiskNotesCard(props: Props) {
-  const { kind, showReportButton = false } = props; // ⬅️ default: false
+  const { kind, showReportButton = false } = props; // default: false
   const navigate = useNavigate();
 
   const level = (props.data.risk_level ?? 0) as 0 | 1 | 2 | 3 | 4;

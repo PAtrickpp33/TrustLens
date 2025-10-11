@@ -57,7 +57,7 @@
   color: #0066cc;
 }
 
-/* حالت فعال */
+/* Active status */
 .nav-link.active {
   background: linear-gradient(to right, #2563eb, #06b6d4);
   color: white;

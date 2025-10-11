@@ -44,7 +44,7 @@
 }
 .hero-title, .hero-title *{ -webkit-text-fill-color: initial; }
 
-/* ✅ Fix selector (یک نقطه اضافی حذف شد) + تایپوگرافی خواناتر */
+/*  Fix selector */
 .hero-sub {
   margin: 0 auto;
   max-width: 740px;

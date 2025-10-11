@@ -123,8 +123,8 @@ export default function ReportScam() {
               message={
                 <span className="report-success-text">
                   <CheckCircle2 size={18} /> {communityCount !== undefined
-                    ? <>Thanks—your report helps protect others. You’re not alone — <b>{communityCount.toLocaleString()}</b> similar reports in the last 30 days.</>
-                    : <>Thanks—your report helps protect others.</>}
+                    ? <>Thanks! Your report helps protect others. You’re not alone. <b>{communityCount.toLocaleString()}</b> similar reports in the last 30 days.</>
+                    : <>Thanks! Your report helps protect others.</>}
                 </span>
               }
             />
