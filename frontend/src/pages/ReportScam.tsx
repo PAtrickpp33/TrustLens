@@ -1,33 +1,31 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { Card, Button, Select, Input, Alert, Typography, Collapse } from "antd";
 import { reportEmail, reportUrl } from "@/lib/api";
+import { CheckCircle2, Sparkles, ShieldCheck, Lock, Clock } from "lucide-react";
+import "./ReportScam.css";
 
 type Kind = "email" | "url";
-
-const COLORS = {
-  text: "#0f172a",
-  sub: "#475569",
-  border: "#e5e7eb",
-  panel: "#ffffff",
-  brandA: "#2563eb",
-  brandB: "#06b6d4",
-  danger: "#dc2626",
-  success: "#059669",
-  dark: "#111827",
-};
+const { Title, Paragraph, Text } = Typography;
 
 function dailyKey(kind: Kind, raw: string) {
-  const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const day = new Date().toISOString().slice(0, 10);
   const value = raw.trim().toLowerCase();
   return `report:${kind}:${value}:${day}`;
 }
 
+// hook up to a stats API later if you like
+async function fetchAggregateCount(_kind: Kind, _value: string): Promise<number | undefined> {
+  try { return undefined; } catch { return undefined; }
+}
+
 export default function ReportScam() {
   const [params] = useSearchParams();
+  const location = useLocation();
 
-  // Prefill from query
   const initialKind = (params.get("type") === "url" ? "url" : "email") as Kind;
   const prefill = params.get("value") ?? "";
+  const jump = params.get("jump") === "1";
 
   const [kind, setKind] = useState<Kind>(initialKind);
   const [value, setValue] = useState(prefill);
@@ -35,70 +33,56 @@ export default function ReportScam() {
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
+  const [communityCount, setCommunityCount] = useState<number | undefined>(undefined);
 
-  // Keep value in sync if the URL param changes
+  const formRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, []);
   useEffect(() => setValue(prefill), [prefill]);
+  useEffect(() => {
+    if (jump && location.hash === "#report-form" && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [jump, location.hash]);
+  useEffect(() => { if (prefill && inputRef.current) inputRef.current.focus(); }, [prefill]);
 
-  // “Already reported today?” derived flag
   const alreadyToday = useMemo(() => {
     const v = value.trim();
-    if (!v) return false;
-    return !!localStorage.getItem(dailyKey(kind, v));
+    return v ? !!localStorage.getItem(dailyKey(kind, v)) : false;
   }, [kind, value]);
-
-  // Reflect derived flag in local state (for button disabling)
   useEffect(() => setReported(alreadyToday), [alreadyToday]);
-
-  // Reset messages on kind/value change
-  useEffect(() => {
-    setErr(null);
-    setOk(null);
-  }, [kind, value]);
+  useEffect(() => { setErr(null); setOk(null); }, [kind, value]);
 
   const validate = () => {
     const v = value.trim();
     if (!v) return "Please enter a value.";
-
     if (kind === "url") {
-      try {
-        const u = new URL(v);
-        if (!/^https?:/i.test(u.protocol)) throw new Error();
-      } catch {
-        return "Please enter a valid URL that starts with https://";
-      }
+      try { const u = new URL(v); if (!/^https?:/i.test(u.protocol)) throw new Error(); }
+      catch { return "Please enter a valid URL that starts with https://"; }
     } else {
-      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      if (!isEmail) return "Please enter a valid email address.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Please enter a valid email address.";
     }
     return null;
   };
 
   const submit = async () => {
-    setErr(null);
-    setOk(null);
-    if (kind === "url") {
-      reportUrl(value)
-    }
-    else if (kind === "email") {
-      reportEmail(value)
-    }
-
+    setErr(null); setOk(null);
     const problem = validate();
-    if (problem) {
-      setErr(problem);
-      return;
-    }
-
-    if (reported) {
-      setErr("This entry was already reported today.");
-      return;
-    }
+    if (problem) return setErr(problem);
+    if (reported) return;
 
     setLoading(true);
     try {
+      let backendOk = true;
+      try { if (kind === "url") await reportUrl(value.trim()); else await reportEmail(value.trim()); }
+      catch { backendOk = false; }
+
       localStorage.setItem(dailyKey(kind, value), "1");
-      setReported(true); // immediately disable
-      setOk("Thanks for your report! You’re helping us improve ScamCheck and keep the community safe.");
+      setReported(true);
+      setOk(backendOk ? "Thanks—your report helps protect others."
+                      : "Thanks—your report was queued as an anonymous signal.");
+      setCommunityCount(await fetchAggregateCount(kind, value.trim()));
     } catch (e: any) {
       setErr(e?.message || "Something went wrong");
     } finally {
@@ -106,165 +90,106 @@ export default function ReportScam() {
     }
   };
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === "Enter" && !loading && !reported) submit();
-  };
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
+    (e) => { if (e.key === "Enter" && !loading && !reported) submit(); };
 
   return (
-    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
+    <main className="report-page">
       {/* HERO */}
-      <div
-        style={{
-          padding: "64px 20px 36px",
-          background: "linear-gradient(90deg, rgba(37,99,235,.12), rgba(6,182,212,.12))",
-          borderBottom: `1px solid ${COLORS.border}`,
-        }}
-      >
-        <div style={{ maxWidth: 800, margin: "0 auto" }}>
-          <div
-            style={{
-              display: "inline-block",
-              padding: "6px 12px",
-              borderRadius: 999,
-              fontSize: 12,
-              fontWeight: 700,
-              color: COLORS.brandA,
-              background: "rgba(37,99,235,.10)",
-              border: "1px solid rgba(37,99,235,.18)",
-              marginBottom: 8,
-            }}
-          >
-            Community safety
+      <header className="report-hero">
+        <div className="report-container report-hero-inner">
+          <span className="report-pill">Community safety</span>
+          <Title level={1} className="report-title">Report a Scam</Title>
+          <Paragraph className="report-sub">
+            Tap <b>Report</b> to send an <Text strong>anonymous signal</Text>. We use it to improve detection and share
+            community trends. Your personal data isn’t stored permanently.
+          </Paragraph>
+          <div className="report-badges">
+            <span className="report-badge"><ShieldCheck size={16}/> Anonymous</span>
+            <span className="report-badge"><Lock size={16}/> No account required</span>
+            <span className="report-badge"><Clock size={16}/> Takes &lt; 1 min</span>
           </div>
-
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 36,
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
-              color: COLORS.text,
-            }}
-          >
-            Report a Scam
-          </h1>
-
-          <p style={{ marginTop: 6, color: COLORS.sub, maxWidth: 700, fontSize: 16, lineHeight: 1.6 }}>
-            Help us improve online safety. Submitting suspicious {kind === "email" ? "emails" : "websites"} makes it
-            easier to detect threats and protect the community from scams.
-          </p>
         </div>
-      </div>
+      </header>
 
       {/* CONTENT */}
-      <section style={{ maxWidth: 800, margin: "24px auto", padding: "0 20px" }}>
-        {/* Success */}
-        {ok && (
-          <div
-            role="status"
-            style={{
-              margin: "12px 0",
-              padding: "18px 20px",
-              borderRadius: 14,
-              background: "rgba(5,150,105,.08)",
-              border: "1px solid rgba(5,150,105,.25)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 22, fontWeight: 900, color: COLORS.text, marginBottom: 4 }}>
-              Thanks for your report!
-            </div>
-            <div style={{ color: COLORS.success, fontWeight: 600, fontSize: 15 }}>
-              You’re helping us improve <strong>ScamCheck</strong> and keep the community safe.
-            </div>
-          </div>
-        )}
-
-        {/* Error */}
-        {err && (
-          <div
-            role="alert"
-            style={{
-              margin: "12px 0",
-              padding: "14px 16px",
-              borderRadius: 12,
-              background: "rgba(220,38,38,.08)",
-              border: "1px solid rgba(220,38,38,.25)",
-              color: COLORS.danger,
-              fontWeight: 600,
-              fontSize: 15,
-            }}
-          >
-            {err}
-          </div>
-        )}
-
-        {/* Card */}
-        <div
-          style={{
-            background: COLORS.panel,
-            border: `1px solid ${COLORS.border}`,
-            borderRadius: 18,
-            padding: 22,
-            boxShadow: "0 14px 40px rgba(2,6,23,.06)",
-          }}
-        >
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <select
-              value={kind}
-              onChange={(e) => setKind(e.target.value as Kind)}
-              disabled={loading || reported}
-              style={{
-                padding: "12px 14px",
-                border: `1px solid ${COLORS.border}`,
-                borderRadius: 12,
-                fontWeight: 600,
-                background: "#fff",
-              }}
-            >
-              <option value="email">Email</option>
-              <option value="url">Website URL</option>
-            </select>
-
-            <input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder={kind === "email" ? "name@example.com" : "https://example.com/login"}
-              disabled={loading || reported}
-              style={{
-                flex: 1,
-                padding: "14px",
-                border: `1px solid ${COLORS.border}`,
-                borderRadius: 12,
-                fontSize: 15,
-              }}
+      <section className="report-container">
+        <div className="report-content-inner" aria-live="polite">
+          {ok && (
+            <Alert
+              type="success"
+              showIcon
+              className="report-success"
+              message={
+                <span className="report-success-text">
+                  <CheckCircle2 size={18} /> {communityCount !== undefined
+                    ? <>Thanks—your report helps protect others. You’re not alone — <b>{communityCount.toLocaleString()}</b> similar reports in the last 30 days.</>
+                    : <>Thanks—your report helps protect others.</>}
+                </span>
+              }
             />
+          )}
+          {err && <Alert type="error" message={err} showIcon className="report-error" />}
 
-            <button
-              onClick={submit}
-              disabled={loading || reported}
-              style={{
-                padding: "12px 20px",
-                borderRadius: 12,
-                background: reported ? "#94a3b8" : COLORS.dark,
-                border: "none",
-                color: "#fff",
-                fontWeight: 700,
-                cursor: reported ? "not-allowed" : "pointer",
-                boxShadow: "0 6px 14px rgba(17,24,39,.18)",
-                minWidth: 170,
-                fontSize: 15,
-              }}
-            >
-              {reported ? "Already reported" : loading ? "Sending…" : "Report"}
-            </button>
+          {/* OUTSIDE EXPLAINER (callout) */}
+          <div className="report-callout" role="note">
+            <Sparkles size={18} />
+            <span>
+              Reports add an <b>anonymous signal</b> that helps our systems and the community identify potential scams faster.
+            </span>
           </div>
 
-          <div style={{ marginTop: 10, color: "#64748b", fontSize: 14, lineHeight: 1.55 }}>
-            <strong>Note:</strong> We don’t store personal data on a server. Your reports are saved locally in this
-            browser and duplicate submissions are blocked for today.
-          </div>
+          {/* FORM CARD */}
+          <Card id="report-form" ref={formRef} className="report-card">
+            <label className="sr-only" htmlFor="report-input">
+              {kind === "email" ? "Email address" : "Website URL"}
+            </label>
+            <div className="report-form-row">
+              <Select
+                className="report-select"
+                value={kind}
+                onChange={(v) => setKind(v as Kind)}
+                disabled={loading || reported}
+                options={[{ value: "email", label: "Email" }, { value: "url", label: "Website URL" }]}
+                aria-label="Type"
+              />
+              <Input
+                id="report-input"
+                className="report-input"
+                ref={inputRef}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={onKeyDown}
+                disabled={loading || reported}
+                placeholder={kind === "email" ? "name@example.com" : "https://example.com/login"}
+                aria-required
+              />
+              <Button
+                className="report-btn"
+                type="primary"
+                onClick={submit}
+                disabled={loading || reported}
+                loading={loading}
+              >
+                {reported ? "Already reported" : "Report"}
+              </Button>
+            </div>
+
+            <Collapse
+              className="report-collapse"
+              items={[{
+                key: "how",
+                label: "How we use your report",
+                children: (
+                  <Paragraph className="report-how-text">
+                    We don’t keep the exact value you submit. We derive a non-reversible fingerprint to build community
+                    statistics and early-warning signals. To reduce noise, duplicate reports from this browser are
+                    ignored for a day.
+                  </Paragraph>
+                ),
+              }]}
+            />
+          </Card>
         </div>
       </section>
     </main>

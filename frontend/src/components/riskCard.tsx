@@ -1,109 +1,95 @@
-// src/components/RiskCard.tsx
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getRiskUi } from "@/lib/riskUi";
-import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
-import { Flag } from "lucide-react";
 import { Button } from "antd";
+import { Flag, HelpCircle, ShieldCheck, AlertCircle, AlertTriangle, AlertOctagon, LucideIcon } from "lucide-react";
+import type { UrlRiskData, EmailRiskData, MobileRiskData } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 
-type Props =
-  | { kind: "url";    data: UrlRiskData }
-  | { kind: "email";  data: EmailRiskData }
-  | { kind: "mobile"; data: MobileRiskData };
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 
-export default function RiskCard(props: Props) {
-  const { kind } = props;
-  const level = props.data.risk_level as 0 | 1 | 2 | 3;
-  const ui = getRiskUi(kind, level);
+type Props =
+  | ({ kind: "url"; data: UrlRiskData } | { kind: "email"; data: EmailRiskData } | { kind: "mobile"; data: MobileRiskData })
+  & { className?: string; showReportButton?: boolean };
+
+type Ui = {
+  label: "UNKNOWN" | "SAFE" | "LOW RISK" | "MEDIUM RISK" | "UNSAFE";
+  text: string; border: string; dot: string; badge: string; Icon: LucideIcon;
+};
+
+function levelToUi(level: 0 | 1 | 2 | 3 | 4): Ui {
+  switch (level) {
+    case 1: return { label: "SAFE", text: "text-green-700", border: "border-green-300", dot: "bg-green-600", badge: "bg-green-50 text-green-700 border border-green-200", Icon: ShieldCheck };
+    case 2: return { label: "LOW RISK", text: "text-amber-700", border: "border-amber-300", dot: "bg-amber-600", badge: "bg-amber-50 text-amber-700 border border-amber-200", Icon: AlertCircle };
+    case 3: return { label: "MEDIUM RISK", text: "text-orange-700", border: "border-orange-300", dot: "bg-orange-600", badge: "bg-orange-50 text-orange-700 border border-orange-200", Icon: AlertTriangle };
+    case 4: return { label: "UNSAFE", text: "text-red-700", border: "border-red-300", dot: "bg-red-600", badge: "bg-red-50 text-red-700 border border-red-200", Icon: AlertOctagon };
+    default: return { label: "UNKNOWN", text: "text-gray-700", border: "border-gray-300", dot: "bg-gray-400", badge: "bg-gray-50 text-gray-700 border border-gray-200", Icon: HelpCircle };
+  }
+}
+
+export default function RiskNotesCard(props: Props) {
+  const { kind, showReportButton = false } = props;
   const navigate = useNavigate();
 
- 
-  const title = (() => {
-    switch (kind) {
-      case "url":    return "Website safety";
-      case "email":  return "Email safety";
-      case "mobile": return "Number safety";
-    }
-  })();
+  const level = (props.data.risk_level ?? 0) as 0 | 1 | 2 | 3 | 4;
+  const ui = levelToUi(level);
+  const { Icon } = ui;
 
- 
-  const primaryLine = (() => {
+  const title = useMemo(() => (kind === "url" ? "Website safety" : kind === "email" ? "Email safety" : "Number safety"), [kind]);
+
+  const primaryLine = useMemo(() => {
     switch (kind) {
-      case "url":    return (props as any).data.url as string;
-      case "email":  return (props as any).data.address as string;
+      case "url": return (props as any).data.url as string;
+      case "email": return (props as any).data.address as string;
       case "mobile": return (props as any).data.e164 as string;
     }
-  })();
+  }, [kind, props]);
 
-  
-  const metaLine = (() => {
-    switch (kind) {
-      case "url": {
-        const d = (props as any).data as UrlRiskData;
-        return `risk=${d.risk_level} · phishing_flag=${d.phishing_flag} · reports=${d.report_count}`;
-      }
-      case "email": {
-        const d = (props as any).data as EmailRiskData;
-        return `risk=${d.risk_level} · mx_valid=${d.mx_valid} · disposable=${d.disposable} · reports=${d.report_count}`;
-      }
-      case "mobile": {
-        const d = (props as any).data as MobileRiskData;
-        return `risk=${d.risk_level} · reports=${d.report_count}`;
-      }
-    }
-  })();
+  const notes = (props.data as any)?.notes as string | null | undefined;
 
-  // Page Report  prefill
   const onGoToReport = () => {
-    const type =
-      kind === "url"   ? "url"   :
-      kind === "email" ? "email" :
-      "phone"; //  mobile
-    navigate(`/report?type=${type}&value=${encodeURIComponent(primaryLine)}`);
+    const type = kind === "url" ? "url" : kind === "email" ? "email" : "phone";
+    navigate(`/report?type=${type}&value=${encodeURIComponent(primaryLine)}#report-form`);
   };
 
   return (
-    <Card className={`mt-4 border-2 ${ui.border}`}>
+    <Card className={`mt-4 border-2 ${ui.border} ${props.className ?? ""}`}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className={`h-2.5 w-2.5 rounded-full ${ui.dot}`} />
-          <span className={`${ui.text}`}>{title}: {ui.label}</span>
-        </CardTitle>
+        <CardTitle className="leading-snug text-xl">{title}</CardTitle>
         <CardDescription className="truncate">{primaryLine}</CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm ${ui.badge}`}>
-          {ui.label}
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className={`h-3 w-3 rounded-full ${ui.dot}`} />
+          <Icon className={`${ui.text}`} size={22} />
+          <div className={`text-2xl font-semibold tracking-tight ${ui.text}`}>{ui.label}</div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          We compared this entry against <strong>300,000+ known signals</strong>.
-          Based on our analysis, it appears <strong className={`${ui.text}`}>{ui.label.toLowerCase()}</strong>.
-        </p>
+        {notes ? (
+          <div className="text-[16px] leading-[1.7] text-slate-800">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw, rehypeSanitize]}
+              components={{ a: ({ node, ...p }) => <a {...p} target="_blank" rel="noopener noreferrer" /> }}
+              className="prose max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0"
+            >
+              {notes}
+            </ReactMarkdown>
+          </div>
+        ) : (
+          <p className="text-[16px] leading-[1.7] text-slate-700">No AI notes were provided for this result.</p>
+        )}
 
-        <p className="text-sm">{ui.note}</p>
-
-        <div className="text-sm">
-          <p className="font-medium mb-1">Recommended next steps:</p>
-          <ul className="list-disc ml-5 space-y-1">
-            {ui.tips.map((t) => (<li key={t}>{t}</li>))}
-          </ul>
-        </div>
-
-        <p className="text-xs text-muted-foreground">{metaLine}</p>
-
-        {/*  Report button */}
-        <div className="flex items-center gap-2 pt-2">
-          <Button
-            type="primary"
-            size="small"
-            icon={<Flag size={16} />}
-            onClick={onGoToReport}
-          >
-            Report
-          </Button>
-        </div>
+        {showReportButton && (
+          <div className="flex items-center gap-2 pt-2">
+            <Button type="default" size="middle" icon={<Flag size={16} />} onClick={onGoToReport}>
+              Report
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

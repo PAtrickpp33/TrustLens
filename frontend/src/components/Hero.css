@@ -16,9 +16,7 @@
 }
 
 /* Decorative blobs */
-.hero-blob{
-  position:absolute; pointer-events:none; filter:blur(60px); opacity:.6; z-index:0;
-}
+.hero-blob{ position:absolute; pointer-events:none; filter:blur(60px); opacity:.6; z-index:0; }
 .hero-blob-a{
   top:-80px; left:-80px; width:340px; height:340px; border-radius:9999px;
   background: radial-gradient(circle at 30% 30%, #f0abfc55, #fb718555, #fdba7450);
@@ -39,53 +37,44 @@
   font-weight:700; font-size:12px; letter-spacing:.4px;
 }
 
-/* Title keeps gradient only on accent span */
 .hero-title{ margin-bottom:12px !important; font-weight:900 !important; line-height:1.1 !important; }
 .hero-title-accent{
   background: linear-gradient(90deg,#0f172a,#4f46e5);
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
-/* Prevent gradient/transparent text leaking to siblings */
-.hero-title, .hero-title *{
-  -webkit-text-fill-color: initial;
-}
+.hero-title, .hero-title *{ -webkit-text-fill-color: initial; }
 
-/* >>> Fix: force paragraph text to be visible & above blobs <<< */
-..hero-sub {
+/* ✅ Fix selector (یک نقطه اضافی حذف شد) + تایپوگرافی خواناتر */
+.hero-sub {
   margin: 0 auto;
-  max-width: 720px;
-  font-size: 18px !important;
+  max-width: 740px;
+  font-size: 20px !important;
   font-weight: 500;
-  line-height: 1.6;
-  color: #1e293b !important;                 /* blue gray */
-  -webkit-text-fill-color: #1e293b !important; /* text-fill override  */
-  background: none !important;               /* remove gradian */
+  line-height: 1.7;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  background: none !important;
   opacity: 1 !important;
   mix-blend-mode: normal !important;
   position: relative;
   z-index: 2;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.6); /* light */
+  text-shadow: 0 1px 2px rgba(255,255,255,0.7);
 }
 
-/* (Paragraph) */
-.ant-typography.hero-sub {
-  color: #1e293b !important;
-  -webkit-text-fill-color: #1e293b !important;
-}
-
+/* Card */
 .hero-card-wrap{ display:flex; justify-content:center; }
 .hero-card{
-  width:min(720px,94%);
+  width:min(760px,94%);
   border-radius:18px !important;
-  box-shadow:0 10px 30px rgba(2,6,23,.08) !important;
+  box-shadow:0 12px 34px rgba(2,6,23,.08) !important;
 }
-
 .hero-card-head{
   display:flex; align-items:center; justify-content:center; gap:8px;
-  font-weight:700; color:#1f2937; margin-bottom:4px;
+  font-weight:700; color:#111827; margin-bottom:6px;
 }
 .hero-card-desc{
-  text-align:center; color:#64748b; margin-bottom:14px;
+  text-align:center; color:#334155; margin-bottom:16px;
+  font-size:16px;
 }
 
 /* Tabs */
@@ -96,9 +85,13 @@
 
 /* Pane */
 .hero-pane{ padding-top:16px; }
-.hero-label{ display:block; margin:6px 0 8px; font-weight:600; color:#334155; }
+.hero-label{ display:block; margin:8px 0 10px; font-weight:600; color:#1f2937; font-size:15px; }
 
-/* CTA */
+/* Inputs & Buttons inside hero card */
+.hero-card .ant-input-lg{ height:50px; font-size:16px; }
+.hero-card .ant-btn-lg{ height:54px; font-size:16px; border-radius:12px; }
+
+/* Primary CTA */
 .hero-cta{
   width:100%;
   margin-top:14px;
@@ -107,8 +100,10 @@
 }
 .hero-cta:hover{ filter:saturate(1.08); }
 
-/* Alert spacing */
-.hero-alert{ margin-top:12px; }
+/* Report CTA panel */
+.report-cta{ border-radius:16px; padding:18px; }
+.report-cta__lead{ font-size:16px; line-height:1.7; color:#1f2937; margin-bottom:8px; }
+.report-cta__foot{ font-size:14px; line-height:1.6; color:#475569; margin-top:8px; }
 
-/* (Nice-to-have) selection color so highlighted text looks consistent */
+/* Selection color */
 ::selection{ background:#c7d2fe; color:#111827; }

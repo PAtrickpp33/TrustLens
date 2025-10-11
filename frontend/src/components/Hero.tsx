@@ -1,15 +1,20 @@
 import { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography } from "antd";
 import { Shield, Globe, Mail, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 import RiskNotesCard from "@/components/ui/riskNotesCard";
 import { scamcheckEmail, scamcheckUrl } from "@/lib/api";
 import type { UrlRiskData, EmailRiskData } from "@/lib/api";
+
 import "./Hero.css";
 
-type Tab = "url" | "email" ;
+type Tab = "url" | "email";
 
+// ----- keep both named and default export to avoid import errors elsewhere
 export function Hero() {
   const [activeTab, setActiveTab] = useState<Tab>("url");
+  const navigate = useNavigate();
 
   // inputs
   const [urlInput, setUrlInput] = useState("");
@@ -17,7 +22,6 @@ export function Hero() {
 
   // status
   const [loading, setLoading] = useState(false);
-  // We avoid surfacing raw error messages to users.
 
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
@@ -31,19 +35,18 @@ export function Hero() {
 
   const handleCheck = useCallback(async () => {
     setLoading(true);
-
     try {
       if (activeTab === "url") {
         setEmailRes(null);
         const data = await scamcheckUrl(urlInput.trim());
         setUrlRes(data);
-      } else if (activeTab === "email") {
+      } else {
         setUrlRes(null);
         const data = await scamcheckEmail(emailInput.trim());
         setEmailRes(data);
-      } 
-    } catch (e: any) {
-      // On any backend error, show a friendly fallback message instead of exposing the error
+      }
+    } catch {
+      // friendly placeholder on backend error
       if (activeTab === "url") {
         setEmailRes(null);
         const placeholder = {
@@ -52,10 +55,11 @@ export function Hero() {
           phishing_flag: 0,
           report_count: 0,
           source: null,
-          notes: "This URL is currently being analyzed by our AI model. Please try again shortly.",
+          notes:
+            "This URL is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies UrlRiskData;
         setUrlRes(placeholder);
-      } else if (activeTab === "email") {
+      } else {
         setUrlRes(null);
         const placeholder = {
           address: emailInput.trim(),
@@ -64,7 +68,8 @@ export function Hero() {
           disposable: 0,
           report_count: 0,
           source: null,
-          notes: "This email address is currently being analyzed by our AI model. Please try again shortly.",
+          notes:
+            "This email address is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies EmailRiskData;
         setEmailRes(placeholder);
       }
@@ -80,6 +85,45 @@ export function Hero() {
     [canSubmit, loading, handleCheck]
   );
 
+  // ----- Report CTA
+  const hasResult = activeTab === "url" ? !!urlRes : !!emailRes;
+
+  const prefillValue =
+    activeTab === "url"
+      ? (urlRes?.url ?? urlInput).trim()
+      : (emailRes?.address ?? emailInput).trim();
+
+  const goReport = () => {
+    if (!hasResult || !prefillValue) return;
+    navigate(
+      `/report?type=${encodeURIComponent(activeTab)}&value=${encodeURIComponent(
+        prefillValue
+      )}#report-form`
+    );
+  };
+
+  const ReportCTA = () => (
+    <div className="report-cta mt-4 border border-slate-200 bg-white shadow-sm">
+      <p className="report-cta__lead">
+        Think this looks suspicious? Report it anonymously to help protect others.
+      </p>
+      <Button
+        type="primary"
+        size="large"
+        onClick={goReport}
+        disabled={!hasResult}
+        className="w-full font-semibold"
+        style={{ height: 56, borderRadius: 12, background: "#111827" }}
+        icon={<Shield size={18} />}
+      >
+        Report this
+      </Button>
+      <p className="report-cta__foot">
+        We use anonymous summaries for statistics. No account required.
+      </p>
+    </div>
+  );
+
   return (
     <section id="home" className="hero-root">
       {/* decorative blobs */}
@@ -93,15 +137,14 @@ export function Hero() {
             <span>Security First</span>
           </div>
 
-          <Typography.Title level={1} className="hero-title">
+        <Typography.Title level={1} className="hero-title">
             Check for <span className="hero-title-accent">Malicious</span>
             <br /> Content Instantly
           </Typography.Title>
 
           <Typography.Paragraph className="hero-sub">
-            Protect yourself online by checking URLs and email addresses
-             for potential threats. Get instant security analysis with
-            detailed explanations.
+            Protect yourself online by checking links, messages, or emails for potential scams.
+            Get a trusted AI-driven safety report in seconds.
           </Typography.Paragraph>
         </div>
 
@@ -151,7 +194,15 @@ export function Hero() {
                         Check Website Security
                       </Button>
 
-                      {urlRes && <RiskNotesCard kind="url" data={urlRes} />}
+                      {urlRes && (
+                        <RiskNotesCard
+                          kind="url"
+                          data={urlRes}
+                          showReportButton={false} // hide legacy inline report button
+                        />
+                      )}
+
+                      {hasResult && activeTab === "url" && <ReportCTA />}
                     </div>
                   ),
                 },
@@ -187,10 +238,18 @@ export function Hero() {
                         Check Email Safety
                       </Button>
 
-                      {emailRes && <RiskNotesCard kind="email" data={emailRes} />}
+                      {emailRes && (
+                        <RiskNotesCard
+                          kind="email"
+                          data={emailRes}
+                          showReportButton={false}
+                        />
+                      )}
+
+                      {hasResult && activeTab === "email" && <ReportCTA />}
                     </div>
                   ),
-                }
+                },
               ]}
             />
           </Card>
