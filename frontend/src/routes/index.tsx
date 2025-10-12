@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
-//import { DashboardLayout } from '@/layouts/DashboardLayout';
+import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 import Quiz from '@/pages/Quiz';
@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
 
       { path: 'features', element: <Quiz /> }, // for epic 10
       { path: 'about', element: <AboutUs /> },
-      //{ path: 'landing', element: <LandingDashboard /> },
+      { path: 'landing', element: <LandingDashboard /> },
       { path: 'overview', element: <LandingOverview /> },
 
       {
