@@ -223,13 +223,11 @@ function Kpi({
   value,
   note,
   gradient,
-  fg,
 }: {
   title: string;
   value: string;
   note?: string;
   gradient: string;
-  fg: string;
 }) {
   return (
     <div
