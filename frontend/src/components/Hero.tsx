@@ -1,20 +1,35 @@
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Upload, message } from "antd";
-import { Shield, Globe, Mail, Search, MessageSquare, Upload as UploadIcon, FileText } from "lucide-react";
+import {
+  Shield,
+  Globe,
+  Mail,
+  Search,
+  MessageSquare,
+  Upload as UploadIcon,
+  FileText,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import RiskNotesCard from "@/components/ui/riskNotesCard";
 import MarkdownReportCard from "@/components/ui/markdownReportCard";
-import { scamcheckEmail, scamcheckUrl, analyzeTextContent, analyzeUploadedContent } from "@/lib/api";
-import type { UrlRiskData, EmailRiskData, ContentAnalysisResponse } from "@/lib/api";
+import {
+  scamcheckEmail,
+  scamcheckUrl,
+  analyzeTextContent,
+  analyzeUploadedContent,
+} from "@/lib/api";
+import type {
+  UrlRiskData,
+  EmailRiskData,
+  ContentAnalysisResponse,
+} from "@/lib/api";
 
 import "./Hero.css";
 
 const { TextArea } = Input;
-
 type Tab = "url" | "email" | "content";
 
-// ----- keep both named and default export to avoid import errors elsewhere
 export function Hero() {
   const [activeTab, setActiveTab] = useState<Tab>("url");
   const navigate = useNavigate();
@@ -33,7 +48,9 @@ export function Hero() {
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
   const [emailRes, setEmailRes] = useState<EmailRiskData | null>(null);
-  const [contentRes, setContentRes] = useState<ContentAnalysisResponse | null>(null);
+  const [contentRes, setContentRes] = useState<ContentAnalysisResponse | null>(
+    null
+  );
 
   const canSubmit = useMemo(() => {
     if (activeTab === "url") return !!urlInput.trim();
@@ -62,17 +79,19 @@ export function Hero() {
       } else if (activeTab === "content") {
         setUrlRes(null);
         setEmailRes(null);
-        
         if (uploadMode === "text") {
           const data = await analyzeTextContent(contentInput.trim());
           setContentRes(data);
         } else if (uploadMode === "file" && selectedFile) {
-          const data = await analyzeUploadedContent(selectedFile, contentInput.trim() || undefined);
+          const data = await analyzeUploadedContent(
+            selectedFile,
+            contentInput.trim() || undefined
+          );
           setContentRes(data);
         }
       }
     } catch (error) {
-      // friendly placeholder on backend error
+      // Friendly placeholder on backend error
       if (activeTab === "url") {
         setEmailRes(null);
         setContentRes(null);
@@ -103,14 +122,24 @@ export function Hero() {
       } else if (activeTab === "content") {
         setUrlRes(null);
         setEmailRes(null);
-        const errorMessage = error instanceof Error ? error.message : "Analysis failed. Please try again.";
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Analysis failed. Please try again.";
         setContentError(errorMessage);
         message.error(errorMessage);
       }
     } finally {
       setLoading(false);
     }
-  }, [activeTab, urlInput, emailInput, contentInput, uploadMode, selectedFile]);
+  }, [
+    activeTab,
+    urlInput,
+    emailInput,
+    contentInput,
+    uploadMode,
+    selectedFile,
+  ]);
 
   const onEnter = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -119,30 +148,29 @@ export function Hero() {
     [canSubmit, loading, handleCheck]
   );
 
-  // File upload handlers
+  // file upload handlers
   const handleFileChange = useCallback((file: File) => {
-    const isValidType = 
-      file.type === "image/jpeg" || 
-      file.type === "image/jpg" || 
-      file.type === "image/png" || 
+    const isValidType =
+      file.type === "image/jpeg" ||
+      file.type === "image/jpg" ||
+      file.type === "image/png" ||
       file.type === "application/pdf";
-    
     if (!isValidType) {
       message.error("Only JPEG, PNG, and PDF files are supported");
       return false;
     }
 
-    const maxSize = file.type === "application/pdf" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    const maxSize =
+      file.type === "application/pdf" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > maxSize) {
       const maxSizeMB = maxSize / (1024 * 1024);
       message.error(`File size must be under ${maxSizeMB}MB`);
       return false;
     }
-
     setSelectedFile(file);
     setContentRes(null);
     setContentError(null);
-    return false; // Prevent automatic upload
+    return false; // prevent automatic upload
   }, []);
 
   const handleRemoveFile = useCallback(() => {
@@ -151,9 +179,8 @@ export function Hero() {
     setContentError(null);
   }, []);
 
-  // ----- Report CTA
+  // report CTA
   const hasResult = activeTab === "url" ? !!urlRes : !!emailRes;
-
   const prefillValue =
     activeTab === "url"
       ? (urlRes?.url ?? urlInput).trim()
@@ -162,24 +189,24 @@ export function Hero() {
   const goReport = () => {
     if (!hasResult || !prefillValue) return;
     navigate(
-      `/report?type=${encodeURIComponent(activeTab)}&value=${encodeURIComponent(
-        prefillValue
-      )}#report-form`
+      `/report?type=${encodeURIComponent(
+        activeTab
+      )}&value=${encodeURIComponent(prefillValue)}#report-form`
     );
   };
 
   const ReportCTA = () => (
-    <div className="report-cta mt-4 border border-slate-200 bg-white shadow-sm">
+    <div className="report-cta">
       <p className="report-cta__lead">
-        Think this looks suspicious? Report it anonymously to help protect others.
+        Think this looks suspicious? Report it anonymously to help protect
+        others.
       </p>
       <Button
         type="primary"
         size="large"
         onClick={goReport}
         disabled={!hasResult}
-        className="w-full font-semibold"
-        style={{ height: 56, borderRadius: 12, background: "#111827" }}
+        className="report-btn"
         icon={<Shield size={18} />}
       >
         Report this
@@ -198,19 +225,14 @@ export function Hero() {
 
       <div className="hero-container">
         <div className="hero-header">
-          <div className="hero-badge">
-            <Shield size={18} />
-            <span>Security First</span>
-          </div>
-
-        <Typography.Title level={1} className="hero-title">
+          <Typography.Title level={1} className="hero-title">
             Check for <span className="hero-title-accent">Malicious</span>
             <br /> Content Instantly
           </Typography.Title>
 
           <Typography.Paragraph className="hero-sub">
-            Protect yourself online by checking links, messages, or emails for potential scams.
-            Get a trusted AI-driven safety report in seconds.
+            Protect yourself online by checking links, messages, or emails for
+            potential scams. Get a trusted AI-driven safety report in seconds.
           </Typography.Paragraph>
         </div>
 
@@ -221,7 +243,8 @@ export function Hero() {
               <span>Security Scanner</span>
             </div>
             <div className="hero-card-desc">
-              Enter a URL, email address, or analyze message content for security threats
+              Enter a URL, email address, or analyze message content for
+              security threats
             </div>
 
             <Tabs
@@ -261,13 +284,14 @@ export function Hero() {
                       </Button>
 
                       {urlRes && (
-                        <RiskNotesCard
-                          kind="url"
-                          data={urlRes}
-                          showReportButton={false} // hide legacy inline report button
-                        />
+                        <div className="result-card light-surface">
+                          <RiskNotesCard
+                            kind="url"
+                            data={urlRes}
+                            showReportButton={false}
+                          />
+                        </div>
                       )}
-
                       {hasResult && activeTab === "url" && <ReportCTA />}
                     </div>
                   ),
@@ -305,13 +329,14 @@ export function Hero() {
                       </Button>
 
                       {emailRes && (
-                        <RiskNotesCard
-                          kind="email"
-                          data={emailRes}
-                          showReportButton={false}
-                        />
+                        <div className="result-card light-surface">
+                          <RiskNotesCard
+                            kind="email"
+                            data={emailRes}
+                            showReportButton={false}
+                          />
+                        </div>
                       )}
-
                       {hasResult && activeTab === "email" && <ReportCTA />}
                     </div>
                   ),
@@ -328,7 +353,8 @@ export function Hero() {
                       <label className="hero-label" htmlFor="content-mode">
                         Analysis Mode
                       </label>
-                      <div className="mb-4 flex gap-2">
+
+                      <div className="hero-mode-switch">
                         <Button
                           type={uploadMode === "text" ? "primary" : "default"}
                           onClick={() => {
@@ -341,6 +367,7 @@ export function Hero() {
                         >
                           Paste Text
                         </Button>
+
                         <Button
                           type={uploadMode === "file" ? "primary" : "default"}
                           onClick={() => {
@@ -357,7 +384,10 @@ export function Hero() {
 
                       {uploadMode === "text" ? (
                         <>
-                          <label className="hero-label" htmlFor="content-input">
+                          <label
+                            className="hero-label"
+                            htmlFor="content-input"
+                          >
                             Message Content
                           </label>
                           <TextArea
@@ -373,7 +403,10 @@ export function Hero() {
                         </>
                       ) : (
                         <>
-                          <label className="hero-label" htmlFor="file-upload">
+                          <label
+                            className="hero-label"
+                            htmlFor="file-upload"
+                          >
                             Upload Screenshot or PDF
                           </label>
                           <Upload.Dragger
@@ -381,17 +414,23 @@ export function Hero() {
                             multiple={false}
                             beforeUpload={handleFileChange}
                             onRemove={handleRemoveFile}
-                            fileList={selectedFile ? [{
-                              uid: '-1',
-                              name: selectedFile.name,
-                              status: 'done',
-                              url: '',
-                            }] : []}
+                            fileList={
+                              selectedFile
+                                ? [
+                                    {
+                                      uid: "-1",
+                                      name: selectedFile.name,
+                                      status: "done",
+                                      url: "",
+                                    },
+                                  ]
+                                : []
+                            }
                             accept=".jpg,.jpeg,.png,.pdf"
-                            className="mb-3"
+                            className="hero-uploader"
                           >
                             <p className="ant-upload-drag-icon">
-                              <UploadIcon size={48} className="mx-auto text-blue-500" />
+                              <UploadIcon size={48} className="upload-icon" />
                             </p>
                             <p className="ant-upload-text">
                               Click or drag file to upload
@@ -400,7 +439,11 @@ export function Hero() {
                               Support JPEG, PNG (max 10MB) or PDF (max 5MB)
                             </p>
                           </Upload.Dragger>
-                          <label className="hero-label text-sm" htmlFor="context-input">
+
+                          <label
+                            className="hero-label"
+                            htmlFor="context-input"
+                          >
                             Additional Context (Optional)
                           </label>
                           <Input
@@ -409,7 +452,7 @@ export function Hero() {
                             placeholder="Add any additional context about the file..."
                             value={contentInput}
                             onChange={(e) => setContentInput(e.target.value)}
-                            className="mb-3"
+                            className="hero-context"
                           />
                         </>
                       )}
@@ -427,19 +470,22 @@ export function Hero() {
                       </Button>
 
                       {contentRes && (
-                        <MarkdownReportCard
-                          markdown={contentRes.markdown_report}
-                          loading={loading}
-                          error={contentError}
-                        />
+                        <div className="result-card light-surface">
+                          <MarkdownReportCard
+                            markdown={contentRes.markdown_report}
+                            loading={loading}
+                            error={contentError}
+                          />
+                        </div>
                       )}
-
                       {contentError && !contentRes && (
-                        <MarkdownReportCard
-                          markdown=""
-                          loading={false}
-                          error={contentError}
-                        />
+                        <div className="result-card light-surface">
+                          <MarkdownReportCard
+                            markdown=""
+                            loading={false}
+                            error={contentError}
+                          />
+                        </div>
                       )}
                     </div>
                   ),
