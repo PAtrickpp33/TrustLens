@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Papa from "papaparse";
 import "./InsightsPeek.css";
 
+
 /**
  * Replace the previous static component with a CSV-powered one.
  * It reads three CSV files placed under /public/data:
@@ -225,14 +226,14 @@ const InsightsPeek: React.FC<Props> = ({
                 <ul className="peek-list">
                   <li><Link to="/overview">Insights → Live feed</Link></li>
                   <li><Link to="/features">Education Hub → Red flags</Link></li>
-                  <li><Link to="/articles">Articles → Case studies</Link></li>
+                  <li><Link to="/landing">Dashboard → Overview</Link></li>
                 </ul>
               </div>
             </div>
           )}
 
           <Link to="/overview" className="peek-cta">
-            Open Insights
+            Insights
           </Link>
         </div>
       </div>
