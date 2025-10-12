@@ -99,3 +99,22 @@ class LLMSettings(BaseSettings):
         return "AI_model/urlnet_model.bin"
         
 llm_settings = LLMSettings()
+
+# ======== Config for OpenAI GPT (SMS/Email Content Analysis) ========
+class GPTSettings(BaseSettings):
+    # OpenAI API configuration
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"  # or gpt-4o-mini for faster/cheaper
+    openai_max_tokens: int = 2048
+    openai_temperature: float = 0.3
+    
+    model_config = SettingsConfigDict(env_prefix="", env_file=".env", extra="ignore")
+    
+    @model_validator(mode="after")
+    def _validate_api_key(self):
+        if not self.openai_api_key or not self.openai_api_key.strip():
+            print("Warning: OPENAI_API_KEY is not set. SMS/Email content analysis features will be disabled.")
+            self.openai_api_key = "dummy_openai_key"
+        return self
+
+gpt_settings = GPTSettings()

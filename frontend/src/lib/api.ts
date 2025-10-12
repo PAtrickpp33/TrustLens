@@ -20,6 +20,7 @@ const URL_BASE = `${API_BASE}/api/v1/url`;
 const EMAIL_BASE = `${API_BASE}/api/v1/email`;
 const MOBILE_BASE = `${API_BASE}/api/v1/mobile`;
 const LLM_BASE = `${API_BASE}/api/v1/llm`;
+const CONTENT_BASE = `${API_BASE}/api/v1/content`;
 
 type ApiResponse<T> = {
   success: boolean;
@@ -450,4 +451,87 @@ export async function scamcheckEmail(address: string, timeoutMs = 12000): Promis
     throw new Error((json as any)?.error ?? "Unexpected API response")
   }
   return json.data
+}
+
+// ======== Content Analysis (SMS/Email) ========
+
+export type ContentAnalysisResponse = {
+  markdown_report: string;
+  has_image: boolean;
+};
+
+// Analyze text content
+export async function analyzeTextContent(
+  content: string,
+  timeoutMs = 30000
+): Promise<ContentAnalysisResponse> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  const res = await fetch(`${CONTENT_BASE}/analyze/text`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error");
+  });
+  clearTimeout(t);
+
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "");
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<ContentAnalysisResponse>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response");
+  }
+  return json.data;
+}
+
+// Analyze uploaded file (image or PDF)
+export async function analyzeUploadedContent(
+  file: File,
+  additionalContext?: string,
+  timeoutMs = 60000
+): Promise<ContentAnalysisResponse> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  const formData = new FormData();
+  formData.append("file", file);
+  if (additionalContext) {
+    formData.append("additional_context", additionalContext);
+  }
+
+  const res = await fetch(`${CONTENT_BASE}/analyze/upload`, {
+    method: "POST",
+    body: formData,
+    signal: controller.signal,
+  }).catch((e) => {
+    throw new Error(e?.message ?? "Network error");
+  });
+  clearTimeout(t);
+
+  if (!res.ok) {
+    const maybeText = await res.text().catch(() => "");
+    try {
+      const j = JSON.parse(maybeText);
+      throw new Error(j?.detail ?? `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  }
+
+  const json = (await res.json()) as ApiResponse<ContentAnalysisResponse>;
+  if (!json?.success || !json?.data) {
+    throw new Error((json as any)?.error ?? "Unexpected API response");
+  }
+  return json.data;
 }

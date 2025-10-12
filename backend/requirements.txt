@@ -165,3 +165,5 @@ webencodings==0.5.1
 websocket-client==1.8.0
 websockets==15.0.1
 widgetsnbextension==4.0.14
+openai==1.58.1
+PyPDF2==3.0.1

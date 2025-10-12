@@ -1,15 +1,18 @@
 import { useState, useCallback, useMemo } from "react";
-import { Card, Tabs, Input, Button, Typography } from "antd";
-import { Shield, Globe, Mail, Search } from "lucide-react";
+import { Card, Tabs, Input, Button, Typography, Upload, message } from "antd";
+import { Shield, Globe, Mail, Search, MessageSquare, Upload as UploadIcon, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import RiskNotesCard from "@/components/ui/riskNotesCard";
-import { scamcheckEmail, scamcheckUrl } from "@/lib/api";
-import type { UrlRiskData, EmailRiskData } from "@/lib/api";
+import MarkdownReportCard from "@/components/ui/markdownReportCard";
+import { scamcheckEmail, scamcheckUrl, analyzeTextContent, analyzeUploadedContent } from "@/lib/api";
+import type { UrlRiskData, EmailRiskData, ContentAnalysisResponse } from "@/lib/api";
 
 import "./Hero.css";
 
-type Tab = "url" | "email";
+const { TextArea } = Input;
+
+type Tab = "url" | "email" | "content";
 
 // ----- keep both named and default export to avoid import errors elsewhere
 export function Hero() {
@@ -19,36 +22,60 @@ export function Hero() {
   // inputs
   const [urlInput, setUrlInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
+  const [contentInput, setContentInput] = useState("");
+  const [uploadMode, setUploadMode] = useState<"text" | "file">("text");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // status
   const [loading, setLoading] = useState(false);
+  const [contentError, setContentError] = useState<string | null>(null);
 
   // results
   const [urlRes, setUrlRes] = useState<UrlRiskData | null>(null);
   const [emailRes, setEmailRes] = useState<EmailRiskData | null>(null);
+  const [contentRes, setContentRes] = useState<ContentAnalysisResponse | null>(null);
 
   const canSubmit = useMemo(() => {
     if (activeTab === "url") return !!urlInput.trim();
     if (activeTab === "email") return !!emailInput.trim();
+    if (activeTab === "content") {
+      if (uploadMode === "text") return !!contentInput.trim();
+      if (uploadMode === "file") return !!selectedFile;
+    }
     return false;
-  }, [activeTab, urlInput, emailInput]);
+  }, [activeTab, urlInput, emailInput, contentInput, uploadMode, selectedFile]);
 
   const handleCheck = useCallback(async () => {
     setLoading(true);
+    setContentError(null);
     try {
       if (activeTab === "url") {
         setEmailRes(null);
+        setContentRes(null);
         const data = await scamcheckUrl(urlInput.trim());
         setUrlRes(data);
-      } else {
+      } else if (activeTab === "email") {
         setUrlRes(null);
+        setContentRes(null);
         const data = await scamcheckEmail(emailInput.trim());
         setEmailRes(data);
+      } else if (activeTab === "content") {
+        setUrlRes(null);
+        setEmailRes(null);
+        
+        if (uploadMode === "text") {
+          const data = await analyzeTextContent(contentInput.trim());
+          setContentRes(data);
+        } else if (uploadMode === "file" && selectedFile) {
+          const data = await analyzeUploadedContent(selectedFile, contentInput.trim() || undefined);
+          setContentRes(data);
+        }
       }
-    } catch {
+    } catch (error) {
       // friendly placeholder on backend error
       if (activeTab === "url") {
         setEmailRes(null);
+        setContentRes(null);
         const placeholder = {
           url: urlInput.trim(),
           risk_level: 0 as 0,
@@ -59,8 +86,9 @@ export function Hero() {
             "This URL is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies UrlRiskData;
         setUrlRes(placeholder);
-      } else {
+      } else if (activeTab === "email") {
         setUrlRes(null);
+        setContentRes(null);
         const placeholder = {
           address: emailInput.trim(),
           risk_level: 0 as 0,
@@ -72,11 +100,17 @@ export function Hero() {
             "This email address is currently being analyzed by our AI model. Please try again shortly.",
         } satisfies EmailRiskData;
         setEmailRes(placeholder);
+      } else if (activeTab === "content") {
+        setUrlRes(null);
+        setEmailRes(null);
+        const errorMessage = error instanceof Error ? error.message : "Analysis failed. Please try again.";
+        setContentError(errorMessage);
+        message.error(errorMessage);
       }
     } finally {
       setLoading(false);
     }
-  }, [activeTab, urlInput, emailInput]);
+  }, [activeTab, urlInput, emailInput, contentInput, uploadMode, selectedFile]);
 
   const onEnter = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -84,6 +118,38 @@ export function Hero() {
     },
     [canSubmit, loading, handleCheck]
   );
+
+  // File upload handlers
+  const handleFileChange = useCallback((file: File) => {
+    const isValidType = 
+      file.type === "image/jpeg" || 
+      file.type === "image/jpg" || 
+      file.type === "image/png" || 
+      file.type === "application/pdf";
+    
+    if (!isValidType) {
+      message.error("Only JPEG, PNG, and PDF files are supported");
+      return false;
+    }
+
+    const maxSize = file.type === "application/pdf" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      const maxSizeMB = maxSize / (1024 * 1024);
+      message.error(`File size must be under ${maxSizeMB}MB`);
+      return false;
+    }
+
+    setSelectedFile(file);
+    setContentRes(null);
+    setContentError(null);
+    return false; // Prevent automatic upload
+  }, []);
+
+  const handleRemoveFile = useCallback(() => {
+    setSelectedFile(null);
+    setContentRes(null);
+    setContentError(null);
+  }, []);
 
   // ----- Report CTA
   const hasResult = activeTab === "url" ? !!urlRes : !!emailRes;
@@ -155,7 +221,7 @@ export function Hero() {
               <span>Security Scanner</span>
             </div>
             <div className="hero-card-desc">
-              Enter a URL or email address to check for security threats
+              Enter a URL, email address, or analyze message content for security threats
             </div>
 
             <Tabs
@@ -247,6 +313,134 @@ export function Hero() {
                       )}
 
                       {hasResult && activeTab === "email" && <ReportCTA />}
+                    </div>
+                  ),
+                },
+                {
+                  key: "content",
+                  label: (
+                    <span className="hero-tab">
+                      <MessageSquare size={16} /> SMS/Email Content
+                    </span>
+                  ),
+                  children: (
+                    <div className="hero-pane">
+                      <label className="hero-label" htmlFor="content-mode">
+                        Analysis Mode
+                      </label>
+                      <div className="mb-4 flex gap-2">
+                        <Button
+                          type={uploadMode === "text" ? "primary" : "default"}
+                          onClick={() => {
+                            setUploadMode("text");
+                            setSelectedFile(null);
+                            setContentRes(null);
+                            setContentError(null);
+                          }}
+                          icon={<FileText size={16} />}
+                        >
+                          Paste Text
+                        </Button>
+                        <Button
+                          type={uploadMode === "file" ? "primary" : "default"}
+                          onClick={() => {
+                            setUploadMode("file");
+                            setContentInput("");
+                            setContentRes(null);
+                            setContentError(null);
+                          }}
+                          icon={<UploadIcon size={16} />}
+                        >
+                          Upload File
+                        </Button>
+                      </div>
+
+                      {uploadMode === "text" ? (
+                        <>
+                          <label className="hero-label" htmlFor="content-input">
+                            Message Content
+                          </label>
+                          <TextArea
+                            id="content-input"
+                            size="large"
+                            placeholder="Paste your suspicious SMS or email content here..."
+                            value={contentInput}
+                            onChange={(e) => setContentInput(e.target.value)}
+                            rows={6}
+                            maxLength={10000}
+                            showCount
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <label className="hero-label" htmlFor="file-upload">
+                            Upload Screenshot or PDF
+                          </label>
+                          <Upload.Dragger
+                            name="file"
+                            multiple={false}
+                            beforeUpload={handleFileChange}
+                            onRemove={handleRemoveFile}
+                            fileList={selectedFile ? [{
+                              uid: '-1',
+                              name: selectedFile.name,
+                              status: 'done',
+                              url: '',
+                            }] : []}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            className="mb-3"
+                          >
+                            <p className="ant-upload-drag-icon">
+                              <UploadIcon size={48} className="mx-auto text-blue-500" />
+                            </p>
+                            <p className="ant-upload-text">
+                              Click or drag file to upload
+                            </p>
+                            <p className="ant-upload-hint">
+                              Support JPEG, PNG (max 10MB) or PDF (max 5MB)
+                            </p>
+                          </Upload.Dragger>
+                          <label className="hero-label text-sm" htmlFor="context-input">
+                            Additional Context (Optional)
+                          </label>
+                          <Input
+                            id="context-input"
+                            size="large"
+                            placeholder="Add any additional context about the file..."
+                            value={contentInput}
+                            onChange={(e) => setContentInput(e.target.value)}
+                            className="mb-3"
+                          />
+                        </>
+                      )}
+
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="hero-cta"
+                        onClick={handleCheck}
+                        disabled={!canSubmit || loading}
+                        loading={loading}
+                        icon={<Shield size={18} />}
+                      >
+                        Analyze Content
+                      </Button>
+
+                      {contentRes && (
+                        <MarkdownReportCard
+                          markdown={contentRes.markdown_report}
+                          loading={loading}
+                          error={contentError}
+                        />
+                      )}
+
+                      {contentError && !contentRes && (
+                        <MarkdownReportCard
+                          markdown=""
+                          loading={false}
+                          error={contentError}
+                        />
+                      )}
                     </div>
                   ),
                 },

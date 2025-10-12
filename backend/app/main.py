@@ -15,6 +15,8 @@ from app.api.routes_url import router as url_router
 from app.api.routes_articles import router as articles_router
 # Richard: Added LLM router
 from app.api.routes_llm import router as llm_router
+# SMS/Email content analysis router
+from app.api.routes_content import router as content_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -62,6 +64,8 @@ try:
     logger.info("Articles router loaded")
     app.include_router(llm_router, prefix="/api/v1", tags=["llm"])
     logger.info("LLM router loaded")
+    app.include_router(content_router, prefix="/api/v1", tags=["content"])
+    logger.info("Content analysis router loaded")
     logger.info("All routers loaded successfully")
 except Exception as e:
     logger.error(f"Error loading routers: {e}")
