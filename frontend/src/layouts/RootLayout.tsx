@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+//import { Footer } from '@/components/Footer';
+import MovingBanner from "@/components/MovingBanner";
 
 export const RootLayout: React.FC = () => {
   return (
@@ -10,7 +11,7 @@ export const RootLayout: React.FC = () => {
       <main className="app-main">
         <Outlet />
       </main>
-      <Footer />
+      <MovingBanner />
     </div>
   );
 };

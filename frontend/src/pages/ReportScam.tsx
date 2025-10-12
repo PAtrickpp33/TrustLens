@@ -1,198 +1,212 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { Card, Button, Select, Input, Alert, Typography, Collapse } from "antd";
-import type { InputRef } from "antd";
-import { reportEmail, reportUrl } from "@/lib/api";
-import { CheckCircle2, Sparkles, ShieldCheck, Lock, Clock } from "lucide-react";
+// pages/ReportScam.tsx  (یا هر فایلی که صفحه Report شماست)
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { Segmented, Input, Button, Collapse, Alert } from "antd";
+import { Globe, Mail, ShieldCheck } from "lucide-react";
 import "./ReportScam.css";
 
+/* ------------------------------------------------------------------ */
+/* Local daily throttle store                                          */
+/* ------------------------------------------------------------------ */
+
+const LS_KEY = "TL_REPORTS_V1"; // map: key -> YYYY-MM-DD
+
+type ReportStore = Record<string, string>;
 type Kind = "email" | "url";
-const { Title, Paragraph, Text } = Typography;
 
-function dailyKey(kind: Kind, raw: string) {
-  const day = new Date().toISOString().slice(0, 10);
-  const value = raw.trim().toLowerCase();
-  return `report:${kind}:${value}:${day}`;
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+function loadStore(): ReportStore {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function saveStore(store: ReportStore) {
+  localStorage.setItem(LS_KEY, JSON.stringify(store));
 }
 
-// hook up to a stats API later if you like
-async function fetchAggregateCount(_kind: Kind, _value: string): Promise<number | undefined> {
-  try { return undefined; } catch { return undefined; }
+/** normalize value to create a stable key per day */
+function canonicalize(value: string, kind: Kind): string {
+  let v = value.trim().toLowerCase();
+  if (kind === "url") {
+    try {
+      const raw = v.startsWith("http") ? v : `https://${v}`;
+      const u = new URL(raw);
+      const host = u.hostname.replace(/^www\./, "");
+      const path = u.pathname.replace(/\/+$/, "");
+      v = `${host}${path || ""}${u.search ? u.search : ""}`;
+    } catch {
+      // leave as-is if URL parsing fails
+    }
+  }
+  return `${kind}:${v}`;
 }
+function isReportedToday(value: string, kind: Kind) {
+  const store = loadStore();
+  const key = canonicalize(value, kind);
+  return store[key] === todayStr();
+}
+function markReportedToday(value: string, kind: Kind) {
+  const store = loadStore();
+  const key = canonicalize(value, kind);
+  store[key] = todayStr();
+  saveStore(store);
+  return key;
+}
+
+/* ------------------------------------------------------------------ */
 
 export default function ReportScam() {
-  const [params] = useSearchParams();
-  const location = useLocation();
+  const [kind, setKind] = useState<Kind>("email");
+  const [value, setValue] = useState("");
+  const [alreadyToday, setAlreadyToday] = useState(false);
+  const [banner, setBanner] = useState<null | "thanks" | "already">(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const initialKind = (params.get("type") === "url" ? "url" : "email") as Kind;
-  const prefill = params.get("value") ?? "";
-  const jump = params.get("jump") === "1";
-
-  const [kind, setKind] = useState<Kind>(initialKind);
-  const [value, setValue] = useState(prefill);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [ok, setOk] = useState<string | null>(null);
-  const [reported, setReported] = useState(false);
-  const [communityCount, setCommunityCount] = useState<number | undefined>(undefined);
-
-  const formRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<InputRef>(null);
-
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, []);
-  useEffect(() => setValue(prefill), [prefill]);
+  // prefill from query ?type=&value=
   useEffect(() => {
-    if (jump && location.hash === "#report-form" && formRef.current) {
-      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    const sp = new URLSearchParams(location.search);
+    const t = sp.get("type");
+    const v = sp.get("value");
+    if ((t === "email" || t === "url") && v) {
+      setKind(t);
+      setValue(v);
+      if (isReportedToday(v, t)) {
+        setAlreadyToday(true);
+        setBanner("already");
+      }
     }
-  }, [jump, location.hash]);
-  useEffect(() => { if (prefill && inputRef.current) inputRef.current.focus(); }, [prefill]);
+  }, []);
 
-  const alreadyToday = useMemo(() => {
-    const v = value.trim();
-    return v ? !!localStorage.getItem(dailyKey(kind, v)) : false;
+  // when user edits value, clear "already" state
+  useEffect(() => {
+    setAlreadyToday(false);
+    setBanner(null);
   }, [kind, value]);
-  useEffect(() => setReported(alreadyToday), [alreadyToday]);
-  useEffect(() => { setErr(null); setOk(null); }, [kind, value]);
 
-  const validate = () => {
-    const v = value.trim();
-    if (!v) return "Please enter a value.";
-    if (kind === "url") {
-      try { const u = new URL(v); if (!/^https?:/i.test(u.protocol)) throw new Error(); }
-      catch { return "Please enter a valid URL that starts with https://"; }
-    } else {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Please enter a valid email address.";
-    }
-    return null;
-  };
+  const canSubmit = useMemo(
+    () => !!value.trim() && !alreadyToday && !submitting,
+    [value, alreadyToday, submitting]
+  );
 
-  const submit = async () => {
-    setErr(null); setOk(null);
-    const problem = validate();
-    if (problem) return setErr(problem);
-    if (reported) return;
+  const handleSubmit = useCallback(async () => {
+    if (!value.trim()) return;
 
-    setLoading(true);
+    setSubmitting(true);
     try {
-      let backendOk = true;
-      try { if (kind === "url") await reportUrl(value.trim()); else await reportEmail(value.trim()); }
-      catch { backendOk = false; }
+      // اگر بک‌اند دارید، اینجا کال کنید:
+      // await api.createReport({ type: kind, value });
 
-      localStorage.setItem(dailyKey(kind, value), "1");
-      setReported(true);
-      setOk(backendOk ? "Thanks—your report helps protect others."
-                      : "Thanks—your report was queued as an anonymous signal.");
-      setCommunityCount(await fetchAggregateCount(kind, value.trim()));
-    } catch (e: any) {
-      setErr(e?.message || "Something went wrong");
+      // Throttle محلی یک‌روزه
+      markReportedToday(value, kind);
+      setAlreadyToday(true);
+      setBanner("thanks");
+    } catch (e) {
+      // خطاهای احتمالی بک‌اند
+      console.error(e);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
-  };
+  }, [value, kind]);
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
-    (e) => { if (e.key === "Enter" && !loading && !reported) submit(); };
+  const items = [
+    {
+      key: "how",
+      label: <span className="collapse-title">How we use your report</span>,
+      children: (
+        <p className="collapse-body">
+          We don’t keep the exact value you submit. We derive a non-reversible fingerprint
+          to build community statistics and early-warning signals. To reduce noise,
+          duplicate reports from this browser are ignored for a day.
+        </p>
+      ),
+    },
+  ];
 
   return (
-    <main className="report-page">
-      {/* HERO */}
-      <header className="report-hero">
-        <div className="report-container report-hero-inner">
-          <span className="report-pill">Community safety</span>
-          <Title level={1} className="report-title">Report a Scam</Title>
-          <Paragraph className="report-sub">
-            Tap <b>Report</b> to send an <Text strong>anonymous signal</Text>. We use it to improve detection and share
-            community trends. Your personal data isn’t stored permanently.
-          </Paragraph>
-          <div className="report-badges">
-            <span className="report-badge"><ShieldCheck size={16}/> Anonymous</span>
-            <span className="report-badge"><Lock size={16}/> No account required</span>
-            <span className="report-badge"><Clock size={16}/> Takes &lt; 1 min</span>
-          </div>
-        </div>
-      </header>
+    <section className="report-root">
+      <div className="report-hero">
+        <span className="report-pill">Community safety</span>
+        <h1 className="report-title">Report a Scam</h1>
+        <p className="report-sub">
+          Tap <b>Report</b> to send an <b>anonymous signal</b>. We use it to improve detection and share
+          community trends. Your personal data isn’t stored permanently.
+        </p>
+      </div>
 
-      {/* CONTENT */}
-      <section className="report-container">
-        <div className="report-content-inner" aria-live="polite">
-          {ok && (
-            <Alert
-              type="success"
-              showIcon
-              className="report-success"
-              message={
-                <span className="report-success-text">
-                  <CheckCircle2 size={18} /> {communityCount !== undefined
-                    ? <>Thanks! Your report helps protect others. You’re not alone. <b>{communityCount.toLocaleString()}</b> similar reports in the last 30 days.</>
-                    : <>Thanks! Your report helps protect others.</>}
-                </span>
-              }
-            />
-          )}
-          {err && <Alert type="error" message={err} showIcon className="report-error" />}
+      {/* badges row (optional) */}
 
-          {/* OUTSIDE EXPLAINER (callout) */}
-          <div className="report-callout" role="note">
-            <Sparkles size={18} />
-            <span>
-              Reports add an <b>anonymous signal</b> that helps our systems and the community identify potential scams faster.
-            </span>
-          </div>
+      {banner === "thanks" && (
+        <Alert
+          type="success"
+          showIcon
+          message="Thanks! Your report helps protect others."
+          style={{ maxWidth: 980, margin: "12px auto" }}
+        />
+      )}
+      {banner === "already" && (
+        <Alert
+          type="info"
+          showIcon
+          message="You already reported this today."
+          style={{ maxWidth: 980, margin: "12px auto" }}
+        />
+      )}
 
-          {/* FORM CARD */}
-          <Card id="report-form" ref={formRef} className="report-card">
-            <label className="sr-only" htmlFor="report-input">
-              {kind === "email" ? "Email address" : "Website URL"}
-            </label>
-            <div className="report-form-row">
-              <Select
-                className="report-select"
-                value={kind}
-                onChange={(v) => setKind(v as Kind)}
-                disabled={loading || reported}
-                options={[{ value: "email", label: "Email" }, { value: "url", label: "Website URL" }]}
-                aria-label="Type"
-              />
-              <Input
-                id="report-input"
-                className="report-input"
-                ref={inputRef}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={onKeyDown}
-                disabled={loading || reported}
-                placeholder={kind === "email" ? "name@example.com" : "https://example.com/login"}
-                aria-required
-              />
-              <Button
-                className="report-btn"
-                type="primary"
-                onClick={submit}
-                disabled={loading || reported}
-                loading={loading}
-              >
-                {reported ? "Already reported" : "Report"}
-              </Button>
-            </div>
-
-            <Collapse
-              className="report-collapse"
-              items={[{
-                key: "how",
-                label: "How we use your report",
-                children: (
-                  <Paragraph className="report-how-text">
-                    We don’t keep the exact value you submit. We derive a non-reversible fingerprint to build community
-                    statistics and early-warning signals. To reduce noise, duplicate reports from this browser are
-                    ignored for a day.
-                  </Paragraph>
+      <div className="report-card">
+        {/* selector */}
+        <div className="report-type">
+          <Segmented
+            value={kind}
+            onChange={(v) => setKind(v as Kind)}
+            options={[
+              {
+                label: (
+                  <span className="seg-item">
+                    <Mail size={16} /> Email
+                  </span>
                 ),
-              }]}
-            />
-          </Card>
+                value: "email",
+              },
+              {
+                label: (
+                  <span className="seg-item">
+                    <Globe size={16} /> URL
+                  </span>
+                ),
+                value: "url",
+              },
+            ]}
+          />
         </div>
-      </section>
-    </main>
+
+        {/* form */}
+        <div className="report-row">
+          <label className="report-label">{kind === "email" ? "Email" : "URL"}</label>
+          <Input
+            size="large"
+            className="report-input"
+            placeholder={kind === "email" ? "name@example.com" : "https://example.com"}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onPressEnter={() => canSubmit && handleSubmit()}
+          />
+
+          <Button
+            size="large"
+            className={`report-btn ${alreadyToday ? "is-disabled" : ""}`}
+            disabled={!canSubmit}
+            loading={submitting}
+            onClick={handleSubmit}
+            icon={<ShieldCheck size={18} />}
+          >
+            {alreadyToday ? "Already reported" : "Report"}
+          </Button>
+        </div>
+
+        <Collapse items={items} className="report-collapse" bordered={false} />
+      </div>
+    </section>
   );
 }

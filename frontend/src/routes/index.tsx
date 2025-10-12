@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
-import { DashboardLayout } from '@/layouts/DashboardLayout';
+//import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 import Quiz from '@/pages/Quiz';
@@ -21,7 +21,6 @@ import LandingOverview from '@/pages/LandingOverview';
 
 import ReportScam from '@/pages/ReportScam';
 import ReportSuccess from '@/pages/ReportSuccess';
-
 // import AdminReportsQueue from '@/pages/admin/AdminReportsQueue';
 
 const withSuspense = (element: React.ReactElement) => (
@@ -47,7 +46,7 @@ export const router = createBrowserRouter([
 
       { path: 'features', element: <Quiz /> }, // for epic 10
       { path: 'about', element: <AboutUs /> },
-      { path: 'landing', element: <LandingDashboard /> },
+      //{ path: 'landing', element: <LandingDashboard /> },
       { path: 'overview', element: <LandingOverview /> },
 
       {
@@ -63,12 +62,12 @@ export const router = createBrowserRouter([
       { path: 'hidden/articles-editor', element: <ArticlesEditor /> },
 
       {
-        path: 'dashboard',
-        element: withSuspense(
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        ),
+       // path: 'dashboard',
+       // element: withSuspense(
+         // <ProtectedRoute>
+         //   <DashboardLayout />
+         // </ProtectedRoute>
+        //),
         children: [
           { path: 'results', element: <Results /> },
         ],
