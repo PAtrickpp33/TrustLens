@@ -428,7 +428,7 @@ function QuickSafetyPanel() {
         borderRadius: 18,
         overflow: "hidden",
         border: `1px solid ${COLORS.border}`,
-        boxShadow: "0 10px 28px rgba(0,0,0,.08)`,
+        boxShadow: "0 10px 28px rgba(0,0,0,.08)",
         background: "linear-gradient(180deg, #0ea5e9 0%, #2563eb 60%, #1f2937 100%)",
       }}
       aria-label="Quick safety check"
