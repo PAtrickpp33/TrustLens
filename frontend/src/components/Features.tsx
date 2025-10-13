@@ -96,8 +96,8 @@ export function Features() {
 
   const ctaLabel = (to?: string) => {
     if (!to) return "";
-    if (to.startsWith("/overview#")) return "View in Overview →";
-    if (to === "/overview") return "Open Overview →";
+    if (to.startsWith("/overview#")) return "";
+    if (to === "/overview") return "";
     if (to.startsWith("/about")) return "Read policy →";
     if (to === "/scamcheck" || to === "/") return "Try ScamCheck →";
     if (to.startsWith("/report")) return "Report a scam →";
