@@ -1,0 +1,2 @@
+id,e164,country_code,risk_level,report_count,last_reported_at,notes,is_deleted
+1,+61412345678,AU,3,2,2025-09-19T09:00:00Z,"crypto giveaway sms",0
