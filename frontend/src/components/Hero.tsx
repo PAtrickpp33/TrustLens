@@ -201,6 +201,12 @@ export function Hero() {
         Think this looks suspicious? Report it anonymously to help protect
         others.
       </p>
+      <p id="content-privacy-note" className="privacy-note">
+        We don’t store your input. Checks run momentarily; only anonymous totals are kept.{" "}
+        <a href="/about" aria-label="Privacy & Governance">Privacy &amp; Governance</a>
+      </p>
+
+
       <Button
         type="primary"
         size="large"
