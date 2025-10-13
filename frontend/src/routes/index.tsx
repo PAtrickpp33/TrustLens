@@ -12,7 +12,7 @@ import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
-import { SiteGate } from './protected';
+import { ProtectedRoute, SiteGate } from './protected';
 
 import LandingDashboard from '@/pages/LandingDashboard';
 import LandingOverview from '@/pages/LandingOverview';
@@ -20,6 +20,7 @@ import LandingOverview from '@/pages/LandingOverview';
 
 import ReportScam from '@/pages/ReportScam';
 import ReportSuccess from '@/pages/ReportSuccess';
+import { DashboardLayout } from '@/layouts/DashboardLayout';
 // import AdminReportsQueue from '@/pages/admin/AdminReportsQueue';
 
 const withSuspense = (element: React.ReactElement) => (
@@ -61,12 +62,12 @@ export const router = createBrowserRouter([
       { path: 'hidden/articles-editor', element: <ArticlesEditor /> },
 
       {
-       // path: 'dashboard',
-       // element: withSuspense(
-         // <ProtectedRoute>
-         //   <DashboardLayout />
-         // </ProtectedRoute>
-        //),
+        path: 'dashboard',
+        element: withSuspense(
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { path: 'results', element: <Results /> },
         ],
