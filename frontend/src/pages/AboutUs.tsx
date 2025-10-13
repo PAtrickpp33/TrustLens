@@ -142,14 +142,14 @@ export default function AboutUs() {
           <GradientCard
             gradient={GRADS.indigoBlue}
             icon="📘"
-            title="Education Hub"
-            body="Red flags by category and bite-size guides you can trust."
+            title="ScamHub"
+            body="Explore real trends."
           />
           <GradientCard
             gradient={GRADS.skyCyan}
             icon="🧾"
-            title="Case Studies"
-            body="Real incidents distilled into 3–5 key lessons."
+            title="ScamSmart Quiz"
+            body="Learn and practice spotting scams"
           />
         </div>
 

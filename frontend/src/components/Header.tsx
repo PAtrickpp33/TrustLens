@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
             ScamCheck
           </NavLink>
           <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
-            Dashboard
+            ScamHub
           </NavLink>
           {/*<NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights
@@ -56,7 +56,7 @@ export const Header: React.FC = () => {
             ScamCheck
           </NavLink>
           <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
-            Dashboard
+            ScamHub
           </NavLink>
           {/*<NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights

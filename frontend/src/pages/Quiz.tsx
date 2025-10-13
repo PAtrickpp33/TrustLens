@@ -272,13 +272,6 @@ const Quiz: React.FC = () => {
             ))}
           </div>
         </section>
-
-        {/* Back link to dashboard if you want it */}
-        <div style={{ marginTop: 14 }}>
-          <a href="/scamhub" style={{ textDecoration: "none", color: "#1D4ED8", fontWeight: 700 }}>
-            ← Back to ScamHub
-          </a>
-        </div>
       </main>
     );
   }
