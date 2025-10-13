@@ -15,8 +15,8 @@ export const Header: React.FC = () => {
       <div className="header-container">
         {/* Logo + Brand */}
         <div className="brand">
-          <img src="/logo/trustlens_logo.jpeg" alt="TrustLens logo" />
-          <span>TrustLens</span>
+          <img src="/logo/trustlens_logo.jpeg" alt="Dodgy Detector logo" />
+          <span>Dodgy Detector</span>
         </div>
 
         {/* Desktop Nav */}

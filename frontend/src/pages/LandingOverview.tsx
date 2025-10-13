@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 /**
- * TrustLens Overview — Dark Blue theme (no Tailwind)
+ * Dodgy Detector Overview — Dark Blue theme (no Tailwind)
  * - drop-in replacement for your current LandingOverview
  */
 
@@ -115,7 +115,7 @@ export default function LandingOverview() {
             color: "transparent",
           }}
         >
-          TrustLens Insights
+          Dodgy Detector Insights
         </h1>
         <p style={{ margin: "6px 0 10px", color: THEME.textMuted, fontSize: 12 }}>
           Key statistics and trends at a glance—scans, detections, risk distribution, and recent cases.

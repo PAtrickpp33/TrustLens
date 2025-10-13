@@ -188,7 +188,7 @@ const InsightsPeek: React.FC<Props> = ({
       <div className="peek-container">
         <div className="peek-surface">
           <h2 id="peek-h" className="peek-title">
-            What <span>TrustLens</span> is Seeing Right Now
+            What <span>Dodgy Detector</span> is Seeing Right Now
           </h2>
 
           <p className="peek-sub">

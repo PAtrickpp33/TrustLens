@@ -1,4 +1,4 @@
-TrustLens Frontend (React + Vite + TypeScript)
+Dodgy Detector Frontend (React + Vite + TypeScript)
 
 Production-ready scaffold with routing, layouts, services, state store, and styles.
 

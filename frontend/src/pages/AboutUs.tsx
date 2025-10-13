@@ -51,7 +51,7 @@ export default function AboutUs() {
   };
 
   return (
-    <main style={pageWrapStyle} role="main" aria-label="About TrustLens">
+    <main style={pageWrapStyle} role="main" aria-label="About Dodgy Detector">
       <section style={containerStyle}>
         {/* HERO */}
         <div
@@ -98,7 +98,7 @@ export default function AboutUs() {
                 textShadow: "0 1px 0 rgba(0,0,0,.3)",
               }}
             >
-              About TrustLens
+              About Dodgy Detector
             </h1>
 
             <p
@@ -111,7 +111,7 @@ export default function AboutUs() {
                 textShadow: "0 1px 0 rgba(0,0,0,.35)",
               }}
             >
-              TrustLens helps people recognise scams, understand online risks, and act with confidence —
+              Dodgy Detector helps people recognise scams, understand online risks, and act with confidence —
               using clear explanations, practical education, and transparent checks.
             </p>
 
@@ -170,7 +170,7 @@ export default function AboutUs() {
             </ul>
           </PanelColored>
 
-          <PanelColored title="How TrustLens Works" bar={GRADS.indigoBlue}>
+          <PanelColored title="How Dodgy Detector Works" bar={GRADS.indigoBlue}>
             <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7, color: COLORS.sub }}>
               <li><b>Check:</b> Parse input (URL/email/number) → enrich with open datasets → evaluate risk signals.</li>
               <li><b>Explain:</b> Show why it’s flagged, confidence hints, and next-step advice.</li>
@@ -221,7 +221,7 @@ export default function AboutUs() {
               backgroundImage: COLORS.gHeroAccent,
             }}
           />
-          © {year} <span style={{ fontWeight: 700, color: "#C7D2FE" }}>TrustLens</span> — Educational use only •
+          © {year} <span style={{ fontWeight: 700, color: "#C7D2FE" }}>Dodgy Detector</span> — Educational use only •
           hello@trustlens.app
         </div>
       </section>

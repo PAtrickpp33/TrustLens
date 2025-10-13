@@ -1,4 +1,4 @@
-// pages/ReportScam.tsx  (یا هر فایلی که صفحه Report شماست)
+// pages/ReportScam.tsx  Report )
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Segmented, Input, Button, Collapse, Alert } from "antd";
 import { Globe, Mail, ShieldCheck } from "lucide-react";

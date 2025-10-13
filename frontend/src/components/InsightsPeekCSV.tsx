@@ -157,7 +157,7 @@ export default function InsightsPeekCSV({ days = 14 }: { days?: number }) {
   return (
     <section className="insights-peek" aria-label="Live insights">
       <div className="peek-card">
-        <h2>What TrustLens is Seeing Right Now</h2>
+        <h2>What Dodgy Detector is Seeing Right Now</h2>
         <p>Snapshot of scam patterns from community reports and CSV feeds (last {days} days).</p>
 
         {err && <div className="peek-error">{err}</div>}
