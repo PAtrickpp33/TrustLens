@@ -1,0 +1,3 @@
+id,registrable_domain,full_url,phishing_flag,risk_level,report_count,last_reported_at,notes,is_deleted
+1,parcel-notify.cc,https://parcel-notify.cc/track,1,4,5,2025-09-20T10:15:00Z,"delivery fee scam",0
+2,xn--paypa1.com,https://xn--paypa1.com/login,1,5,9,2025-09-22T08:20:00Z,"paypal phishing",0

@@ -1,0 +1,2 @@
+id,address,domain,risk_level,mx_valid,disposable,report_count,last_reported_at,notes,is_deleted
+1,refund@mytax-ato.help,mytax-ato.help,4,0,0,3,2025-09-21T12:00:00Z,"tax refund lure",0
