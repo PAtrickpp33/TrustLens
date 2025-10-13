@@ -161,21 +161,18 @@ export default function LandingOverview() {
           value={totalScans.toLocaleString()}
           note={`${range} days`}
           gradient={`linear-gradient(135deg, ${THEME.primarySoft}, ${THEME.primary})`}
-          fg={THEME.text}
         />
         <Kpi
           title="Detection Rate"
           value={`${detectionRate.toFixed(1)}%`}
           note="Detected / Scans"
           gradient={`linear-gradient(135deg, ${THEME.secondarySoft}, ${THEME.secondary})`}
-          fg={THEME.text}
         />
         <Kpi
           title="Detected Scams"
           value={totalDetected.toLocaleString()}
           note="Flagged/Blocked"
           gradient={`linear-gradient(135deg, ${THEME.successSoft}, ${THEME.success})`}
-          fg={THEME.text}
         />
       </div>
 

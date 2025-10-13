@@ -10,6 +10,7 @@ declare module 'papaparse' {
     download?: boolean;
     header?: boolean;
     dynamicTyping?: boolean;
+    skipEmptyLines?: boolean | 'greedy';
     complete?: (results: ParseResult<T>) => void;
     error?: (error: { message?: string }) => void;
   }
