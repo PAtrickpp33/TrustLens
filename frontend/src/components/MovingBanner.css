@@ -1,0 +1,105 @@
+/* ---------- Config ---------- */
+:root{
+  /* Underlay (background behind the rectangle) */
+  --underlay-a:#1a1442;   /* deep purple */
+  --underlay-b:#0a1d35;   /* navy */
+  --underlay-pad:48px;    /* vertical spacing so the underlay is visible */
+
+  /* Main rectangle */
+  --banner-h:260px;       /* rectangle height */
+  --radius:22px;
+
+  /* Marquee text size/color (keep readable, not huge) */
+  --seq-font:clamp(18px,3.6vw,40px);
+  --seq-color:rgba(255,255,255,.12);
+
+  /* Lines & panel colors */
+  --edge:rgba(255,255,255,.10);
+  --panel-a:#0b1f3a;
+  --panel-b:#0a2342;
+}
+/*last */
+/* Full-width underlay */
+/* === MovingBanner - No Box === */
+.banner-underlay{
+  max-width: 1120px;
+  margin: 28px auto 0;
+  padding: 0 20px;
+  background: transparent;        
+}
+
+/* Main rectangle (same width feel as About container) */
+.moving-banner{
+  position: relative;
+  padding: 24px 10px 32px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Inner frame to center content */
+.moving-banner-inner{
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* Marquee track */
+.moving-track{ 
+  display: flex; 
+  width: max-content; 
+  animation: banner-scroll 28s linear infinite;
+}
+
+/* Marquee text */
+.moving-seq{
+  margin-right: 40px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  font-size: clamp(38px, 6vw, 80px);
+  color: rgba(255,255,255,.06);  
+  white-space: nowrap;
+}
+
+/* Animation: center-to-center loop */
+@keyframes banner-scroll { to { transform: translateX(-50%); } }
+
+
+/* Legal links (bottom-right inside rectangle) */
+.banner-links{
+  position: absolute;
+  right: 24px; bottom: 8px;
+  display: flex; gap: 28px;
+}
+.banner-links a{
+  color: #C7D2FE;
+  text-decoration: none;
+  opacity: .9;
+}
+.banner-links a:hover{ opacity: 1; text-decoration: underline; }
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce){
+  .moving-track{ animation:none; }
+}
+
+/* Optional: soft tint (very subtle) */
+.moving-banner--tint::before{
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #102841cc, #0a1b2fcc);
+  filter: blur(14px);
+  opacity: .22;                  
+}
+
+.moving-banner{
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(24,36,60,.85), rgba(10,20,36,.85)),
+    url('/bg/banner-network.webp') center/cover no-repeat;
+}

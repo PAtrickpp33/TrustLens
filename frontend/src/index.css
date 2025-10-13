@@ -4873,3 +4873,21 @@ html {
     opacity: 0;
   }
 }
+
+/* === Global dark canvas (site-wide) === */
+html, body, #root{
+  background:
+    radial-gradient(120% 120% at 10% -10%, #13304d 0%, transparent 60%),
+    radial-gradient(120% 120% at 90% 10%, #0f2742 0%, transparent 60%),
+    linear-gradient(180deg, #0b1b2e 0%, #071421 100%) fixed;
+  /* Optional: improve form widgets in dark */
+  color-scheme: dark;
+}
+
+/* Kill default white from Ant Design Layout globally */
+.ant-layout,
+.ant-layout-content,
+.ant-layout-header,
+.ant-layout-footer{
+  background: transparent !important;
+}

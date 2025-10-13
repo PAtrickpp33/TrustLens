@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 
 /**
- * TrustLens Scam Dashboard — Responsive SVG (no libs)
+ * Dodgy Detector Scam Dashboard — Responsive SVG (no libs)
  * - Reads /scam_data.csv from /public
  * - Normalizes columns (Category/Reports/Loss)
  */
@@ -216,7 +216,7 @@ export default function LandingDashboard() {
           backgroundImage: "linear-gradient(90deg, #1d4ed8, #06b6d4, #3b82f6)",
           WebkitBackgroundClip: "text", color: "transparent", margin: 0
         }}>
-          TrustLens Scam Dashboard
+          Dodgy Detector Scam Dashboard
         </h1>
         <p style={{ color: COLORS.subtext, marginTop: 6 }}>
           Based on NASC/Scamwatch (Targeting Scams 2024) — locally served CSV.

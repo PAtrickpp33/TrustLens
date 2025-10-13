@@ -1,15 +1,16 @@
-:root {
-  --muted: #475569;
-  --panel: #ffffff;
-  --panel-border: #e5e7eb;
-  --bg: #f9fafb;             
-  --icon-bg: #eef2ff;    
-  --title: #0f172a;
-  --brand-a: #4f46e5;
-  --brand-b: #a855f7;
-}
+/* ===================== Features — Dark Blue ===================== */
 
-.feat-root {
+/* feat root */
+.feat-root{
+  --muted: #c7d4f2;
+  --panel: rgba(255,255,255,0.06);
+  --panel-border: rgba(255,255,255,0.16);
+  --bg: linear-gradient(180deg, #0a1d35 0%, #071225 100%);
+  --icon-bg: rgba(255,255,255,0.10);
+  --title: #f3f7ff;
+  --brand-a: #93c5fd;
+  --brand-b: #60a5fa;
+
   padding: 80px 0;
   background: var(--bg);
 }
@@ -36,27 +37,30 @@
   max-width: 760px;
   margin: 0 auto !important;
   font-size: 16.5px !important;
-  line-height: 1.6;
-  color: #334155 !important;                   /* replace */
-  -webkit-text-fill-color: #334155 !important;
+  line-height: 1.7;
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted) !important;
   opacity: 1 !important;
+  background: none !important;
 }
 
-/* Card */
+/* Cards */
 .feat-card {
   height: 100%;
   border-radius: 16px !important;
   border: 1px solid var(--panel-border) !important;
-  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.05) !important;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35) !important;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
   background: var(--panel);
+  color: var(--title);
+  backdrop-filter: blur(8px);
 }
 .feat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.08) !important;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Card header */
+/* Cards Frame */
 .feat-card-head {
   display: flex;
   align-items: center;
@@ -71,25 +75,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0e7ff, #f5d0fe);
+  background: linear-gradient(135deg, rgba(147,197,253,.25), rgba(96,165,250,.25));
   box-shadow: inset 0 0 0 6px var(--icon-bg);
   color: var(--brand-a);
 }
 
 .feat-title-sm {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--title);
 }
 
-/* Description text */
+/* Texts */
 .feat-desc {
   margin: 0 !important;
   font-size: 15.5px !important;
-  line-height: 1.7 !important;
-  color: #1e293b !important;                   /* dark */
-  -webkit-text-fill-color: #1e293b !important;
+  line-height: 1.8 !important;
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted) !important;
   opacity: 1 !important;
   background: none !important;
   mix-blend-mode: normal !important;
+}
+
+.hero-root{
+  position: relative;
+  overflow: hidden;
+  padding: 80px 0 110px;
+  background:
+    radial-gradient(120% 100% at 10% -10%, rgba(59,130,246,.25), transparent 60%),
+    linear-gradient(180deg, rgba(5,15,30,.85), rgba(5,15,30,.70)),
+    url('/bg/hero-network-2.webp') center/cover no-repeat;
+  color: #fff;
 }

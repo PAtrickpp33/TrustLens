@@ -1,0 +1,141 @@
+:root {
+  --ink: #EAF2FF;
+  --muted: #BFD3F6;
+  --btn-grad: linear-gradient(90deg, #3B82F6, #06B6D4);
+  --btn-grad-h: linear-gradient(90deg, #60A5FA, #22D3EE);
+  --btn-ghost: rgba(255,255,255,.08);
+  --btn-ghost-b: rgba(255,255,255,.16);
+  --shadow-strong: 0 22px 60px rgba(5,10,25,.45);
+  --shadow-soft: 0 18px 44px rgba(5,10,25,.35);
+}
+
+/* ---------- FULL-BLEED HERO (no card, no radius) ---------- */
+.intro.intro--fullbleed{
+  position: relative;
+
+  /* full-bleed trick */
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+
+  /* spacing */
+  padding: clamp(64px, 10vw, 160px) 24px;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  color: var(--ink);
+  overflow: visible !important;
+}
+
+/* background layer we can scale */
+.intro.intro--fullbleed::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--intro-bg);
+  background-repeat: no-repeat;
+  background-position: var(--bg-pos, center);
+  background-size: cover;
+  transform: scale(var(--bg-zoom, 1));   /* ← زوم/عرض تصویر */
+  transform-origin: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* dark/blue overlay for readability */
+.intro-overlay{
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(6,16,31,.88) 0%, rgba(6,16,31,.72) 46%, rgba(6,16,31,.52) 70%, rgba(6,16,31,.35) 100%),
+    radial-gradient(800px 400px at 0% 0%, rgba(96,165,250,.12), transparent 70%),
+    radial-gradient(800px 400px at 100% 100%, rgba(167,139,250,.12), transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* content */
+.intro-container {
+  position: relative;
+  z-index: 2;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.intro-left { min-width: 0; }
+
+/* ---------- Typography ---------- */
+.intro-title {
+  margin: 0 0 12px;
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--ink);
+  font-size: clamp(32px, 6vw, 64px);
+  letter-spacing: -0.02em;
+}
+.intro-accent {
+  background: linear-gradient(90deg, #93C5FD, #67E8F9, #60A5FA);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.intro-sub {
+  margin: 10px 0 18px;
+  color: var(--muted);
+  font-size: clamp(15px, 1.9vw, 18px);
+  line-height: 1.7;
+  max-width: 720px;
+}
+
+/* ---------- Buttons ---------- */
+.intro-ctas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.intro-btn {
+  appearance: none;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  border-radius: 14px;
+  height: 54px;
+  padding: 0 20px;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  transition: filter .18s ease, transform .12s ease, box-shadow .18s ease;
+}
+
+.intro-btn--primary {
+  background-image: var(--btn-grad);
+  color: #0a1830;
+  box-shadow: var(--shadow-soft);
+}
+.intro-btn--primary:hover {
+  background-image: var(--btn-grad-h);
+  filter: saturate(1.06);
+  transform: translateY(-1px);
+}
+
+.intro-btn--ghost {
+  color: var(--ink);
+  background: var(--btn-ghost);
+  border: 1px solid var(--btn-ghost-b);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.intro-btn--ghost:hover {
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px){
+  .intro.intro--fullbleed{ padding-left: 16px; padding-right: 16px; }
+  .intro-title{ font-size: clamp(30px, 8vw, 48px); }
+}

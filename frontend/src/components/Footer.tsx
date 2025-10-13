@@ -12,11 +12,11 @@ export const Footer: React.FC = () => {
               {/* Richard: Placed TrustLens logo from public/logo */}
               <div
                 className="w-8 h-8 rounded-2xl overflow-hidden border border-foreground/10 ring-1 ring-black/5 bg-card"
-                aria-label="TrustLens"
+                aria-label="Dodgy Detector"
               >
                 <img
                   src="/logo/trustlens_logo.jpeg"
-                  alt="TrustLens logo"
+                  alt="Dodgy Detector logo"
                   className="w-full h-full object-cover"
                 />
               </div>
