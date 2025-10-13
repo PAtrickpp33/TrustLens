@@ -1,6 +1,7 @@
 // import { Link } from "react-router-dom";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
+impo
 
 /** Story-led ScamHub dashboard with original charts — cleaned filters + hints */
 
@@ -390,7 +391,7 @@ function QuickSafetyPanel() {
           Guidance only — if unsure, don’t click.
         </span>
         <a
-          href="/features" /* change to /quiz if that’s your quiz route */
+          href="/quiz" /* change to /quiz if that’s your quiz route */
           style={{
             background: "#22c55e",
             color: "white",
