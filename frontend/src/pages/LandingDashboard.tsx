@@ -5,6 +5,7 @@
 //  - Make left card (pie) smaller and the right card (bars) wider using a weighted 2-col layout
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import Papa from "papaparse";
 
 /** ---------- Types ---------- */
@@ -473,10 +474,10 @@ function QuickSafetyPanel() {
         }}
       >
         <span style={{ color: "rgba(255,255,255,.85)", fontSize: 13 }}>
-          Guidance only — if unsure, don’t click.
+          Guidance only — if unsure, don't click.
         </span>
-        <a
-          href="/features" /* change to /quiz if that’s your quiz route */
+        <Link
+          to="/features"
           style={{
             background: "#22c55e",
             color: "white",
@@ -488,7 +489,7 @@ function QuickSafetyPanel() {
           }}
         >
           Test yourself → Quiz
-        </a>
+        </Link>
       </div>
     </section>
   );
