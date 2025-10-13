@@ -1,4 +1,4 @@
-// pages/ReportScam.tsx 
+// pages/ReportScam.tsx  Report )
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Segmented, Input, Button, Collapse, Alert } from "antd";
 import { Globe, Mail, ShieldCheck } from "lucide-react";
@@ -95,15 +95,15 @@ export default function ReportScam() {
 
     setSubmitting(true);
     try {
-     
+      // اگر بک‌اند دارید، اینجا کال کنید:
       // await api.createReport({ type: kind, value });
 
-      // Throttle 
+      // Throttle محلی یک‌روزه
       markReportedToday(value, kind);
       setAlreadyToday(true);
       setBanner("thanks");
     } catch (e) {
-      
+      // خطاهای احتمالی بک‌اند
       console.error(e);
     } finally {
       setSubmitting(false);

@@ -1,3 +1,4 @@
+//Iteration3
 import React, { useState, useCallback, useMemo } from "react";
 import { Card, Tabs, Input, Button, Typography, Upload, message } from "antd";
 import {
@@ -205,8 +206,6 @@ export function Hero() {
         We don’t store your input. Checks run momentarily; only anonymous totals are kept.{" "}
         <a href="/about" aria-label="Privacy & Governance">Privacy &amp; Governance</a>
       </p>
-
-
       <Button
         type="primary"
         size="large"
@@ -272,7 +271,7 @@ export function Hero() {
                       <Input
                         id="url-input"
                         size="large"
-                        placeholder="'https://www.dodgydetector.shop/' or 'www.dodgydetector.shop'"
+                        placeholder="'https://www.trustlens.me' or 'www.trustlens.me'"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                         onKeyDown={onEnter}

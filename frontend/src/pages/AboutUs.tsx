@@ -222,7 +222,7 @@ export default function AboutUs() {
             }}
           />
           © {year} <span style={{ fontWeight: 700, color: "#C7D2FE" }}>Dodgy Detector</span> — Educational use only •
-          hello@DodgyDetector.app
+          hello@trustlens.app
         </div>
       </section>
     </main>

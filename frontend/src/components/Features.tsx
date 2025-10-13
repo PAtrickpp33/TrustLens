@@ -62,7 +62,7 @@ const features: FeatureItem[] = [
     title: "Detailed Reports",
     description:
       "Comprehensive security reports with actionable insights, threat breakdowns, and safety recommendations.",
-    to: "",
+    to: "/",
   },
 ];
 

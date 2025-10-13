@@ -2,16 +2,10 @@
   "extends": [
     "development"
   ],
-  "hints": {
-<<<<<<< HEAD
-    "axe/aria": [
-      "default",
-      {
-        "aria-valid-attr-value": "off"
-      }
-    ]
-=======
-    "button-type": "off"
->>>>>>> 54ebadeae287448af4841cc068e8566911d05740
-  }
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not ios_saf <= 17.5",
+    "not safari <= 17.5"
+  ]
 }
