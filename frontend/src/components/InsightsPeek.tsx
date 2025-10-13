@@ -63,14 +63,14 @@ const InsightsPeek: React.FC<Props> = ({
                   <Link to="/features">Education Hub → Red flags</Link>
                 </li>
                 <li>
-                  <Link to="/dashboard">Dashboard → Overview</Link>
+                  <Link to="/landing">ScamHub → Overview</Link>
                 </li>
               </ul>
             </div>
           </div>
 
           <Link to="/landing" className="peek-cta">
-            Dashboard
+            ScamHub
           </Link>
         </div>
       </div>
