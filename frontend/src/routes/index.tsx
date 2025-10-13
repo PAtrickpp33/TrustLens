@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
-import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 import Quiz from '@/pages/Quiz';
@@ -13,7 +12,7 @@ import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
-import { ProtectedRoute, SiteGate } from './protected';
+import { SiteGate } from './protected';
 
 import LandingDashboard from '@/pages/LandingDashboard';
 import LandingOverview from '@/pages/LandingOverview';

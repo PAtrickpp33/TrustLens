@@ -1,5 +1,5 @@
 // pages/ReportScam.tsx  (یا هر فایلی که صفحه Report شماست)
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Segmented, Input, Button, Collapse, Alert } from "antd";
 import { Globe, Mail, ShieldCheck } from "lucide-react";
 import "./ReportScam.css";

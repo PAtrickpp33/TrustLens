@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 
 type UrlRow = {
@@ -61,7 +61,7 @@ async function loadCSV<T = any>(url: string): Promise<T[]> {
     Papa.parse<T>(url, {
       download: true,
       header: true,
-      skipEmptyLines: true,
+      skipEmptyLines: 'greedy',
       complete: (res) => resolve(res.data as T[]),
       error: (err) => reject(err),
     });
