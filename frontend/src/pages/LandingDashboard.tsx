@@ -1,4 +1,4 @@
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 
@@ -377,7 +377,11 @@ function QuickSafetyPanel() {
       <div
         style={{
           padding: 14,
-          textAlign: "center",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          flexWrap: "wrap",
           background: "rgba(255,255,255,.06)",
           borderTop: "1px solid rgba(255,255,255,.15)",
         }}
@@ -385,6 +389,20 @@ function QuickSafetyPanel() {
         <span style={{ color: "rgba(255,255,255,.85)", fontSize: 13 }}>
           Guidance only — if unsure, don't click.
         </span>
+        <Link
+          to="/features"
+          style={{
+            background: "#22c55e",
+            color: "white",
+            textDecoration: "none",
+            padding: "10px 14px",
+            borderRadius: 12,
+            fontWeight: 800,
+            boxShadow: "0 8px 18px rgba(34,197,94,.35)",
+          }}
+        >
+          Test yourself → Quiz
+        </Link>
       </div>
     </section>
   );
