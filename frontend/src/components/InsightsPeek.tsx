@@ -224,7 +224,7 @@ const InsightsPeek: React.FC<Props> = ({
               <div className="peek-card">
                 <h3 className="peek-card-title">Where to dig deeper</h3>
                 <ul className="peek-list">
-                  <li><Link to="/overview">Insights → Live feed</Link></li>
+                  <li><Link to="/about">Mission → Policy</Link></li>
                   <li><Link to="/features">Education Hub → Red flags</Link></li>
                   <li><Link to="/landing">Dashboard → Overview</Link></li>
                 </ul>
