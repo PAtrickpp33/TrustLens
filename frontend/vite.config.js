@@ -16,7 +16,16 @@ export default defineConfig(function (_a) {
         },
         server: {
             port: 5173,
-            open: true
+            open: true,
+            proxy: {
+                // Forward frontend /api requests to HTTP backend to avoid mixed-content
+                '/api': {
+                    target: env.VITE_DEV_PROXY_TARGET || env.VITE_API_BASE_URL || 'http://localhost:8000',
+                    changeOrigin: true,
+                    // Do not secure, backend runs over HTTP
+                    secure: false
+                }
+            }
         },
         build: {
             sourcemap: true,
