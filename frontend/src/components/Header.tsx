@@ -24,9 +24,9 @@ export const Header: React.FC = () => {
           <NavLink to="/" end className={linkClass} onClick={closeMenu}>
             ScamCheck
           </NavLink>
-          {/*<NavLink to="/landing" className={linkClass} onClick={closeMenu}>
+          <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
             Dashboard
-          </NavLink>*/}
+          </NavLink>
           <NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights
           </NavLink>
@@ -55,9 +55,9 @@ export const Header: React.FC = () => {
           <NavLink to="/" end className={linkClass} onClick={closeMenu}>
             ScamCheck
           </NavLink>
-       {/* <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
+          <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
             Dashboard
-          </NavLink>*/}
+          </NavLink>
           <NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights
           </NavLink>
