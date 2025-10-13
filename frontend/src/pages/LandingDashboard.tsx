@@ -64,7 +64,6 @@ export default function LandingDashboard() {
   const [loading, setLoading] = useState(true);
 
   // filters
-  thead
   const [year, setYear] = useState<string>("All");
   const [category, setCategory] = useState<string>("All");
   const [topN, setTopN] = useState<number>(5);
