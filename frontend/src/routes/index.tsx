@@ -61,12 +61,12 @@ export const router = createBrowserRouter([
       { path: 'hidden/articles-editor', element: <ArticlesEditor /> },
 
       {
-       // path: 'dashboard',
-       // element: withSuspense(
-         // <ProtectedRoute>
-         //   <DashboardLayout />
-         // </ProtectedRoute>
-        //),
+        path: 'dashboard',
+        element: withSuspense(
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { path: 'results', element: <Results /> },
         ],
