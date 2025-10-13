@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
         {/* Logo + Brand */}
         <div className="brand">
           <img src="/logo/trustlens_logo.jpeg" alt="TrustLens logo" />
-          <span>Dodgy Detector</span>
+          <span>TrustLens</span>
         </div>
 
         {/* Desktop Nav */}
@@ -27,9 +27,9 @@ export const Header: React.FC = () => {
           <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
             Dashboard
           </NavLink>
-          <NavLink to="/overview" className={linkClass} onClick={closeMenu}>
+          {/*<NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights
-          </NavLink>
+          </NavLink>*/}
           <NavLink to="/features" className={linkClass} onClick={closeMenu}>
             Quiz
           </NavLink>
@@ -58,9 +58,9 @@ export const Header: React.FC = () => {
           <NavLink to="/landing" className={linkClass} onClick={closeMenu}>
             Dashboard
           </NavLink>
-          <NavLink to="/overview" className={linkClass} onClick={closeMenu}>
+          {/*<NavLink to="/overview" className={linkClass} onClick={closeMenu}>
             Insights
-          </NavLink>
+          </NavLink>*/}
           <NavLink to="/features" className={linkClass} onClick={closeMenu}>
             Quiz
           </NavLink>
