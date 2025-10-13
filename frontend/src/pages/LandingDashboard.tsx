@@ -1,9 +1,13 @@
-import { Link } from "react-router-dom";
+// LandingDashboard.tsx
+// Story-led ScamHub dashboard with responsive custom SVG charts.
+// Fixes included:
+//  - Prevent clipped numbers on the right of the horizontal bar chart (CategoryBars)
+//  - Make left card (pie) smaller and the right card (bars) wider using a weighted 2-col layout
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 
-/** Story-led ScamHub dashboard with original charts — cleaned filters + hints */
-
+/** ---------- Types ---------- */
 type Row = {
   Month: string;
   Year: string | number;
@@ -13,7 +17,7 @@ type Row = {
 };
 type Point = { label: string; month: string; year: string; reports: number; loss: number };
 
-/* ---- Visual constants (white cards so it reads well in light or dark OS theme) ---- */
+/** ---------- Visual constants ---------- */
 const COLORS = {
   kpiBlue: "#3B82F6",
   kpiGreen: "#10B981",
@@ -27,13 +31,17 @@ const COLORS = {
   grid: "#E5E7EB",
   bgSoft: "#F9FAFB",
 };
-const PALETTE = ["#3B82F6","#10B981","#F59E0B","#EF4444","#8B5CF6","#06B6D4","#84CC16","#F97316","#EC4899","#14B8A6","#A855F7","#D946EF"];
+const PALETTE = [
+  "#3B82F6","#10B981","#F59E0B","#EF4444","#8B5CF6",
+  "#06B6D4","#84CC16","#F97316","#EC4899","#14B8A6",
+  "#A855F7","#D946EF",
+];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const monthIndex = (m: string) => Math.max(0, MONTHS.indexOf(m));
 const monthKey = (m: string, y: string|number) =>
   `${String(y).padStart(4,"0")}-${String(monthIndex(m)+1).padStart(2,"0")}`;
 
-/* ---- Category normalization + friendly meanings ---- */
+/** ---------- Category normalization + help text ---------- */
 const normalizeCategory = (c?: string) => {
   const t = (c || "").trim();
   const map: Record<string, string> = {
@@ -64,27 +72,35 @@ const CATEGORY_MEANING: Record<string, string> = {
   Other: "Mixed/unclear category or not reported.",
 };
 
+/** ---------- Small hook to read container width (for responsive SVGs) ---------- */
 function useContainerWidth<T extends HTMLElement>(min = 320): [React.RefObject<T>, number] {
   const ref = useRef<T>(null);
   const [w, setW] = useState<number>(min);
   useEffect(() => {
     const el = ref.current; if (!el) return;
-    const obs = new ResizeObserver(([entry]) => setW(Math.max(min, Math.floor(entry.contentRect.width))));
-    obs.observe(el); return () => obs.disconnect();
+    const obs = new ResizeObserver(([entry]) => {
+      setW(Math.max(min, Math.floor(entry.contentRect.width)));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, [min]);
   return [ref, w];
 }
 
+/** ======================================================================== */
+/**                               MAIN VIEW                                  */
+/** ======================================================================== */
 export default function LandingDashboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string|null>(null);
 
-  // filters
+  // Filters
   const [year, setYear] = useState("All");
   const [category, setCategory] = useState("All");
   const [topN, setTopN] = useState(5);
 
+  // Load & normalize CSV
   useEffect(() => {
     Papa.parse<any>("/scam_data.csv", {
       download: true, header: true, dynamicTyping: true,
@@ -103,19 +119,21 @@ export default function LandingDashboard() {
                    !Number.isNaN(r.Reports) && !Number.isNaN(r.LossMillions)
           );
           setRows(data);
-        } catch (e:any) { setError(e?.message || "Parse error"); }
-        finally { setLoading(false); }
+        } catch (e:any) {
+          setError(e?.message || "Parse error");
+        } finally {
+          setLoading(false);
+        }
       },
       error: (err) => { setError(err.message || "CSV error"); setLoading(false); },
     });
   }, []);
 
+  // Distinct filter values
   const years = useMemo(
     () => ["All", ...Array.from(new Set(rows.map(r=>String(r.Year)))).sort()],
     [rows]
   );
-
-  // ONE "All" only + normalized names + strip any accidental "All" from data
   const categories = useMemo(() => {
     const unique = Array.from(
       new Set(rows.map(r => normalizeCategory(r.Category)).filter(Boolean))
@@ -125,6 +143,7 @@ export default function LandingDashboard() {
     return ["All", ...unique];
   }, [rows]);
 
+  // Apply filters
   const filtered = useMemo(
     () => rows.filter(r =>
       (year === "All" || String(r.Year) === year) &&
@@ -133,27 +152,38 @@ export default function LandingDashboard() {
     [rows, year, category]
   );
 
+  // Aggregate by month
   const series: Point[] = useMemo(() => {
     if (!filtered.length) return [];
     const m = new Map<string, Point>();
     filtered.forEach((r) => {
       const k = `${r.Year}-${r.Month}`;
-      if (!m.has(k)) m.set(k, { label: `${r.Month} ${r.Year}`, month: String(r.Month), year: String(r.Year), reports: 0, loss: 0 });
+      if (!m.has(k)) m.set(k, {
+        label: `${r.Month} ${r.Year}`,
+        month: String(r.Month),
+        year: String(r.Year),
+        reports: 0,
+        loss: 0
+      });
       const p = m.get(k)!; p.reports += r.Reports; p.loss += r.LossMillions;
     });
-    return Array.from(m.values()).sort((a,b)=>monthKey(a.month,a.year).localeCompare(monthKey(b.month,b.year)));
+    return Array.from(m.values())
+      .sort((a,b)=>monthKey(a.month,a.year).localeCompare(monthKey(b.month,b.year)));
   }, [filtered]);
 
+  // KPIs
   const totalReports = series.reduce((s,p)=>s+p.reports,0);
   const totalLoss = series.reduce((s,p)=>s+p.loss,0);
   const avgLoss = totalReports ? totalLoss/totalReports : 0;
 
+  // Peak months
   const monthRanks = useMemo(() => {
     const byLoss=[...series].sort((a,b)=>b.loss-a.loss);
     const byReports=[...series].sort((a,b)=>b.reports-a.reports);
     return { maxLoss: byLoss[0]?.label, maxReports: byReports[0]?.label };
   }, [series]);
 
+  // Last month deltas
   const lastChange = useMemo(() => {
     if (series.length < 2) return null;
     const prev = series[series.length-2], curr = series[series.length-1];
@@ -162,6 +192,7 @@ export default function LandingDashboard() {
     return { month: curr.label, diffLoss, pctLoss, diffRep, pctRep };
   }, [series]);
 
+  // Aggregate by category
   const byCategory = useMemo(() => {
     const m = new Map<string,{loss:number;reports:number}>();
     filtered.forEach(r=>{
@@ -200,12 +231,12 @@ export default function LandingDashboard() {
         </p>
       </div>
 
-      {/* INSIGHT STRIP */}
+      {/* Insight strip */}
       <div style={{background:"#EFF6FF",border:`1px solid #BFDBFE`,borderRadius:12,padding:"10px 14px",marginBottom:10,color:"#334155"}}>
         💬 Australians lost <b>${totalLoss.toFixed(0)}m</b> across {totalReports.toLocaleString()} reports in this selection.
       </div>
 
-      {/* FILTERS */}
+      {/* Filters */}
       <div
         style={{
           background: "#FFFFFF",
@@ -242,14 +273,14 @@ export default function LandingDashboard() {
         )}
       </div>
 
-      {/* Category meaning hint */}
+      {/* Category quick meaning hint */}
       <div style={{ textAlign:"center", marginBottom: 16, color: COLORS.subtext, fontSize: 12 }}>
         {category === "All"
           ? "Tip: choose a category to see its meaning."
           : CATEGORY_MEANING[category] || ""}
       </div>
 
-      {/* SECTION 1 — Big picture with KPIs */}
+      {/* SECTION 1 — KPIs */}
       <Section title="1) The big picture" blurb="Losses remain high even as report counts fluctuate — scams that succeed are getting more sophisticated.">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:14 }}>
           <Kpi title="Total Reports" value={totalReports.toLocaleString()} note="Reports with loss" color={COLORS.kpiBlue}/>
@@ -279,36 +310,69 @@ export default function LandingDashboard() {
       </Section>
 
       {/* SECTION 3 — Categories */}
-      <Section title="3) Where does risk come from?" blurb="These categories dominate total losses — use them as red-flag cues.">
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))", gap:18 }}>
+      <Section
+        title="3) Where does risk come from?"
+        blurb="These categories dominate total losses — use them as red-flag cues."
+      >
+        {/* WeightedTwoCol makes the left (pie) smaller and right (bars) wider */}
+        <WeightedTwoCol gap={18}>
           <Card title="Loss share by category" subtitle={`Top ${topN} categories`}>
             {byCategory.length ? (
               <>
-                <ResponsiveChart minWidth={320}>{(w)=> <CategoryPie data={byCategory.slice(0, topN)} width={w} height={260} />}</ResponsiveChart>
-                <Legend items={byCategory.slice(0, topN).map((c,i)=>({label:c.name, color: PALETTE[i%PALETTE.length]}))}/>
+                {/* Intentionally clamp the pie width to keep it compact */}
+                <ResponsiveChart minWidth={260}>
+                  {(w)=> (
+                    <CategoryPie
+                      data={byCategory.slice(0, topN)}
+                      width={Math.min(w, 400)}
+                      height={240}
+                    />
+                  )}
+                </ResponsiveChart>
+                <Legend
+                  items={byCategory
+                    .slice(0, topN)
+                    .map((c,i)=>({label:c.name, color: PALETTE[i%PALETTE.length]}))}
+                />
               </>
             ) : <p style={{ color: COLORS.subtext }}>No category data found.</p>}
           </Card>
+
           <Card title="Loss ($m) by category" subtitle={`Top ${topN} categories`}>
             {byCategory.length ? (
-              <ResponsiveChart>{(w)=> <CategoryBars data={byCategory.slice(0, topN)} width={w} height={260} />}</ResponsiveChart>
+              <ResponsiveChart>
+                {(w)=> (
+                  <CategoryBars
+                    data={byCategory.slice(0, topN)}
+                    width={w}
+                    height={260}
+                  />
+                )}
+              </ResponsiveChart>
             ) : <p style={{ color: COLORS.subtext }}>No category data found.</p>}
           </Card>
-        </div>
+        </WeightedTwoCol>
 
         <Card title={`Top ${topN} categories`} subtitle="Sorted by loss ($m)">
-          {byCategory.length ? <CategoryTable rows={byCategory.slice(0, topN)} totalLoss={totalLoss} /> : <p style={{ color: COLORS.subtext }}>No category data found.</p>}
+          {byCategory.length
+            ? <CategoryTable rows={byCategory.slice(0, topN)} totalLoss={totalLoss} />
+            : <p style={{ color: COLORS.subtext }}>No category data found.</p>}
         </Card>
       </Section>
 
-      {/* Quick Safety Panel */}
+      {/* Safety tips panel */}
       <QuickSafetyPanel />
     </section>
   );
 }
 
-/* -------- story helpers -------- */
-function Section({ title, blurb, children }:{ title: string; blurb?: string; children: React.ReactNode; }) {
+/** ======================================================================== */
+/**                                SECTIONS                                  */
+/** ======================================================================== */
+
+function Section({ title, blurb, children }:{
+  title: string; blurb?: string; children: React.ReactNode;
+}) {
   return (
     <section
       style={{
@@ -333,6 +397,28 @@ function Section({ title, blurb, children }:{ title: string; blurb?: string; chi
   );
 }
 
+/** A responsive 2-column layout with a 1 : 1.6 width ratio (stacks on small screens). */
+function WeightedTwoCol({ children, gap=18 }:{children:React.ReactNode; gap?:number}) {
+  const [ref, w] = useContainerWidth<HTMLDivElement>(320);
+  const isStack = w < 900; // stack into a single column below this width
+  return (
+    <div
+      ref={ref}
+      style={{
+        display: "grid",
+        gridTemplateColumns: isStack ? "1fr" : "1fr 1.6fr",
+        gap,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** ======================================================================== */
+/**                            QUICK SAFETY PANEL                             */
+/** ======================================================================== */
+
 function QuickSafetyPanel() {
   return (
     <section
@@ -342,7 +428,7 @@ function QuickSafetyPanel() {
         borderRadius: 18,
         overflow: "hidden",
         border: `1px solid ${COLORS.border}`,
-        boxShadow: "0 10px 28px rgba(0,0,0,.08)",
+        boxShadow: "0 10px 28px rgba(0,0,0,.08)`,
         background: "linear-gradient(180deg, #0ea5e9 0%, #2563eb 60%, #1f2937 100%)",
       }}
       aria-label="Quick safety check"
@@ -387,10 +473,10 @@ function QuickSafetyPanel() {
         }}
       >
         <span style={{ color: "rgba(255,255,255,.85)", fontSize: 13 }}>
-          Guidance only — if unsure, don't click.
+          Guidance only — if unsure, don’t click.
         </span>
-        <Link
-          to="/features"
+        <a
+          href="/features" /* change to /quiz if that’s your quiz route */
           style={{
             background: "#22c55e",
             color: "white",
@@ -402,7 +488,7 @@ function QuickSafetyPanel() {
           }}
         >
           Test yourself → Quiz
-        </Link>
+        </a>
       </div>
     </section>
   );
@@ -423,8 +509,13 @@ function Tip({ icon, title, text }: { icon: string; title: string; text: string 
 }
 function Divider() { return <div aria-hidden style={{ display: "none" }} />; }
 
-/* -------- UI atoms -------- */
-function Kpi({ title, value, note, color }:{title:string; value:string; note?:string; color:string}) {
+/** ======================================================================== */
+/**                                UI ATOMS                                   */
+/** ======================================================================== */
+
+function Kpi({ title, value, note, color }:{
+  title:string; value:string; note?:string; color:string
+}) {
   return (
     <div style={{ backgroundColor: color, color: "white", borderRadius: 14, padding: "18px 16px", textAlign: "center", boxShadow: "0 6px 16px rgba(0,0,0,0.12)" }}>
       <div style={{ fontSize: 13, opacity: 0.95 }}>{title}</div>
@@ -433,7 +524,9 @@ function Kpi({ title, value, note, color }:{title:string; value:string; note?:st
     </div>
   );
 }
-function Card({ title, subtitle, children }:{title:string; subtitle?:string; children:React.ReactNode}) {
+function Card({ title, subtitle, children }:{
+  title:string; subtitle?:string; children:React.ReactNode
+}) {
   return (
     <div style={{ background:"#fff", border:`1px solid ${COLORS.border}`, borderRadius:16, padding:16, boxShadow:"0 2px 10px rgba(0,0,0,0.05)" }}>
       <h3 style={{margin:0, color:"#1E3A8A", fontWeight:700}}>{title}</h3>
@@ -465,13 +558,22 @@ function Select({
 function ResetBtn({ onClick }:{onClick:()=>void}) {
   return <button onClick={onClick} style={{ border:`1px solid ${COLORS.border}`, background:"#fff", borderRadius:999, padding:"6px 12px", cursor:"pointer", fontSize:13 }}>Reset filters</button>;
 }
-function ResponsiveChart({ children, minWidth = 360 }:{children:(w:number)=>React.ReactNode; minWidth?:number}) {
+/** Wrapper that measures its own width and gives it to the chart render function. */
+function ResponsiveChart({ children, minWidth = 360 }:{
+  children:(w:number)=>React.ReactNode; minWidth?:number
+}) {
   const [ref, width] = useContainerWidth<HTMLDivElement>(minWidth);
   return <div ref={ref} style={{ width:"100%" }}>{children(width)}</div>;
 }
 
-/* -------- Charts (unchanged visuals) -------- */
-function LossLine({ data, width, height }:{data:Point[]; width:number; height:number}) {
+/** ======================================================================== */
+/**                                  CHARTS                                   */
+/** ======================================================================== */
+
+/** Simple line chart for monthly loss trend. */
+function LossLine({ data, width, height }:{
+  data:Point[]; width:number; height:number
+}) {
   const pad=36, W=Math.max(360,width), H=height, maxY=Math.max(1,...data.map(d=>d.loss));
   const stepX=(W-pad*2)/Math.max(1,data.length-1);
   const y=(v:number)=>H-pad-(v/maxY)*(H-pad*2);
@@ -487,7 +589,11 @@ function LossLine({ data, width, height }:{data:Point[]; width:number; height:nu
     </svg>
   );
 }
-function ReportsBars({ data, width, height }:{data:Point[]; width:number; height:number}) {
+
+/** Simple vertical bar chart for monthly report counts. */
+function ReportsBars({ data, width, height }:{
+  data:Point[]; width:number; height:number
+}) {
   const pad=36, W=Math.max(360,width), H=height, gap=6, maxY=Math.max(1,...data.map(d=>d.reports));
   const barW=(W-pad*2-gap*(data.length-1))/Math.max(1,data.length);
   return (
@@ -501,11 +607,20 @@ function ReportsBars({ data, width, height }:{data:Point[]; width:number; height
     </svg>
   );
 }
-function CategoryPie({ data, width, height }:{data:{name:string;loss:number}[]; width:number; height:number}) {
-  const W=Math.max(320,width), H=height, cx=W/2, cy=H/2+6, r=Math.min(120, Math.floor(W/4)), inner=Math.max(40, Math.floor(r*.55));
+
+/** Donut pie for category share of loss. */
+function CategoryPie({ data, width, height }:{
+  data:{name:string;loss:number}[]; width:number; height:number
+}) {
+  const W=Math.max(320,width), H=height, cx=W/2, cy=H/2+6;
+  const r=Math.min(120, Math.floor(W/4)), inner=Math.max(40, Math.floor(r*.55));
   const total=Math.max(1,data.reduce((s,d)=>s+d.loss,0));
   let start=-Math.PI/2;
-  const arcs = data.map((d,idx)=>{const a=(d.loss/total)*Math.PI*2, end=start+a, path=donutArc(cx,cy,r,inner,start,end); start=end; return {path,color:PALETTE[idx%PALETTE.length]};});
+  const arcs = data.map((d,idx)=>{
+    const a=(d.loss/total)*Math.PI*2, end=start+a;
+    const path=donutArc(cx,cy,r,inner,start,end); start=end;
+    return {path,color:PALETTE[idx%PALETTE.length]};
+  });
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H}}>
       {arcs.map((a,i)=><path key={i} d={a.path} fill={a.color} stroke="#fff" strokeWidth={1}/>)}
@@ -520,21 +635,97 @@ function donutArc(cx:number, cy:number, r:number, r0:number, start:number, end:n
   const x1=cx+r*Math.cos(end),   y1=cy+r*Math.sin(end);
   const x2=cx+r0*Math.cos(end),  y2=cy+r0*Math.sin(end);
   const x3=cx+r0*Math.cos(start),y3=cy+r0*Math.sin(start);
-  return [`M ${x0} ${y0}`,`A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`,`L ${x2} ${y2}`,`A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3}`,"Z"].join(" ");
+  return [
+    `M ${x0} ${y0}`,
+    `A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`,
+    `L ${x2} ${y2}`,
+    `A ${r0} ${r0} 0 ${large} 0 ${x3} ${y3}`,
+    "Z"
+  ].join(" ");
 }
-function CategoryBars({ data, width, height }:{data:{name:string;loss:number}[]; width:number; height:number}) {
-  const pad=36, W=Math.max(360,width), H=height, gap=8, max=Math.max(1,...data.map(d=>d.loss));
-  const barH=(H-pad*2-gap*(data.length-1))/data.length;
+
+/**
+ * Horizontal bar chart for loss by category (Top N).
+ * FIX: add right padding and clamp the value label's x so it never overflows the viewBox.
+ */
+/** Horizontal bar chart with value labels INSIDE bars */
+function CategoryBars({
+  data, width, height,
+}: { data:{name:string;loss:number}[]; width:number; height:number }) {
+  const padL = 120;   // more space so left category names don't clip
+  const padR = 16;    // small right padding (labels sit inside now)
+  const yPad = 36;    // top/bottom padding
+  const W = Math.max(360, width), H = height, gap = 10;
+
+  const innerW = W - padL - padR;
+  const max = Math.max(1, ...data.map(d => d.loss));
+  const barH = (H - yPad*2 - gap*(data.length-1)) / data.length;
+
+  // heuristic: minimum px needed to keep label at the end of the bar
+  const MIN_INSIDE_PX = 56;
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:H}}>
-      {data.map((d,i)=>{const w=(d.loss/max)*(W-pad*2), y=pad+i*(barH+gap);
-        return (<g key={i}><rect x={pad} y={y} width={w} height={barH} rx={6} fill={PALETTE[i%PALETTE.length]}/>
-          <text x={pad-8} y={y+barH/2+4} fontSize="12" fill={COLORS.text} textAnchor="end">{d.name}</text>
-          <text x={pad+w+6} y={y+barH/2+4} fontSize="12" fill={COLORS.subtext}>${d.loss.toFixed(1)}m</text></g>);
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H }}>
+      {data.map((d, i) => {
+        const w = (d.loss / max) * innerW;
+        const y = yPad + i * (barH + gap);
+
+        const valueLabel = `$${d.loss.toFixed(1)}m`;
+
+        // If bar wide enough, put label at bar end (inside, right-aligned).
+        // If too small, put label at bar start (inside, left-aligned).
+        const placeInsideEnd = w >= MIN_INSIDE_PX;
+        const xForText = placeInsideEnd ? (padL + w - 8) : (padL + 8);
+        const anchor: "start" | "end" = placeInsideEnd ? "end" : "start";
+        const fill = placeInsideEnd ? "#fff" : COLORS.subtext;
+
+        return (
+          <g key={i}>
+            {/* bar */}
+            <rect
+              x={padL}
+              y={y}
+              width={w}
+              height={barH}
+              rx={8}
+              fill={PALETTE[i % PALETTE.length]}
+            />
+
+            {/* left category name */}
+            <text
+              x={padL - 8}
+              y={y + barH / 2 + 4}
+              fontSize="12"
+              fill={COLORS.text}
+              textAnchor="end"
+            >
+              {d.name}
+            </text>
+
+            {/* value label ON the bar */}
+            <text
+              x={xForText}
+              y={y + barH / 2 + 4}
+              fontSize="12"
+              fontWeight={600}
+              textAnchor={anchor}
+              fill={fill}
+              // subtle stroke so white text is readable on bright colors
+              stroke="rgba(0,0,0,.25)"
+              strokeWidth={placeInsideEnd ? 0.8 : 0}
+              style={{ paintOrder: "stroke" }}
+            >
+              {valueLabel}
+            </text>
+          </g>
+        );
       })}
     </svg>
   );
 }
+
+
+/** Compact legend for color/category. */
 function Legend({ items }:{items:{label:string;color:string}[]}) {
   return (
     <div style={{ display:"flex", flexWrap:"wrap", gap:10, marginTop:6 }}>
@@ -547,7 +738,11 @@ function Legend({ items }:{items:{label:string;color:string}[]}) {
     </div>
   );
 }
-function CategoryTable({ rows, totalLoss }:{rows:{name:string;loss:number;reports:number}[]; totalLoss:number}) {
+
+/** Data table for the Top N categories. */
+function CategoryTable({ rows, totalLoss }:{
+  rows:{name:string;loss:number;reports:number}[]; totalLoss:number
+}) {
   return (
     <div style={{ overflowX:"auto" }}>
       <table style={{ width:"100%", borderCollapse:"collapse" }}>
@@ -579,5 +774,5 @@ function Td({ children, align="left" }:{children:React.ReactNode; align?:"left"|
   return <td style={{ textAlign:align, color:COLORS.text, fontSize:13, padding:"10px 8px" }}>{children}</td>;
 }
 
-/* helpers */
+/** Small helper for signed deltas like +1.2 / -0.5 */
 function fmtDelta(v:number){ const sign = v>0?"+":""; return `${sign}${v.toFixed(1)}`; }
