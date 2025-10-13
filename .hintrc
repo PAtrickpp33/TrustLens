@@ -3,11 +3,15 @@
     "development"
   ],
   "hints": {
+<<<<<<< HEAD
     "axe/aria": [
       "default",
       {
         "aria-valid-attr-value": "off"
       }
     ]
+=======
+    "button-type": "off"
+>>>>>>> 54ebadeae287448af4841cc068e8566911d05740
   }
 }
