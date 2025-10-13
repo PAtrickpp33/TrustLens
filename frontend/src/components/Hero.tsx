@@ -206,6 +206,11 @@ export function Hero() {
         We don’t store your input. Checks run momentarily; only anonymous totals are kept.{" "}
         <a href="/about" aria-label="Privacy & Governance">Privacy &amp; Governance</a>
       </p>
+
+      <p id="content-privacy-note" className="privacy-note">
+        ML-generated advisory. Not legal or financial advice—verify with official sources.
+      </p>
+
       <Button
         type="primary"
         size="large"
