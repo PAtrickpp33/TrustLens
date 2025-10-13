@@ -377,32 +377,14 @@ function QuickSafetyPanel() {
       <div
         style={{
           padding: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-          flexWrap: "wrap",
+          textAlign: "center",
           background: "rgba(255,255,255,.06)",
           borderTop: "1px solid rgba(255,255,255,.15)",
         }}
       >
         <span style={{ color: "rgba(255,255,255,.85)", fontSize: 13 }}>
-          Guidance only — if unsure, don’t click.
+          Guidance only — if unsure, don't click.
         </span>
-        <a
-          href="/features" /* change to /quiz if that’s your quiz route */
-          style={{
-            background: "#22c55e",
-            color: "white",
-            textDecoration: "none",
-            padding: "10px 14px",
-            borderRadius: 12,
-            fontWeight: 800,
-            boxShadow: "0 8px 18px rgba(34,197,94,.35)",
-          }}
-        >
-          Test yourself → Quiz
-        </a>
       </div>
     </section>
   );
