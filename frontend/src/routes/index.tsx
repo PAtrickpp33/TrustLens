@@ -12,7 +12,7 @@ import Articles from '@/pages/Articles';
 import ArticleDetail from '@/pages/ArticleDetail';
 import { ArticlesLayout } from '@/layouts/ArticlesLayout';
 import ArticlesEditor from '@/pages/ArticlesEditor';
-import { ProtectedRoute, SiteGate } from './protected';
+import { ProtectedRoute } from './protected';
 
 import LandingDashboard from '@/pages/LandingDashboard';
 import LandingOverview from '@/pages/LandingOverview';
@@ -32,11 +32,7 @@ const withSuspense = (element: React.ReactElement) => (
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: withSuspense(
-      <SiteGate>
-        <RootLayout />
-      </SiteGate>
-    ),
+    element: withSuspense(<RootLayout />),
     children: [
       { index: true, element: <ScamCheck /> },
 
@@ -79,10 +75,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: (
-      <SiteGate>
-        <NotFound />
-      </SiteGate>
-    ),
+    element: <NotFound />,
   },
 ]);
