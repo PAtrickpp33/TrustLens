@@ -64,6 +64,7 @@ export default function LandingDashboard() {
   const [loading, setLoading] = useState(true);
 
   // filters
+  thead
   const [year, setYear] = useState<string>("All");
   const [category, setCategory] = useState<string>("All");
   const [topN, setTopN] = useState<number>(5);
@@ -322,12 +323,46 @@ function Card({ title, subtitle, children }: React.PropsWithChildren<{ title: st
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v:string)=>void; options: string[] }) {
+/* UPDATED: White & bold filter labels */
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
   return (
-    <label style={{display:"flex", gap:8, alignItems:"center", color:COLORS.text, fontSize:13}}>
+    <label
+      style={{
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+        color: "#FFFFFF",   // white label text
+        fontWeight: 700,    // bold label text
+        fontSize: 13,
+      }}
+    >
       <span>{label}:</span>
-      <select value={value} onChange={(e)=>onChange(e.target.value)} style={{ border:`1px solid ${COLORS.border}`, borderRadius:10, padding:"6px 10px", background:"white", color:COLORS.text }}>
-        {options.map(op => <option key={op} value={op}>{op}</option>)}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: 10,
+          padding: "6px 10px",
+          background: "white",
+          color: COLORS.text, // keep select text dark for readability
+        }}
+      >
+        {options.map((op) => (
+          <option key={op} value={op}>
+            {op}
+          </option>
+        ))}
       </select>
     </label>
   );
