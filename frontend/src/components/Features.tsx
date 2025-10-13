@@ -27,7 +27,7 @@ const features: FeatureItem[] = [
     title: "Advanced Threat Detection",
     description:
       "Detect malware, phishing, scams, and other security threats using advanced AI algorithms and real-time threat intelligence.",
-    to: "/overview#trend",
+    to: "/",
   },
   {
     icon: Zap,
@@ -48,7 +48,7 @@ const features: FeatureItem[] = [
     title: "Risk Assessment",
     description:
       "Detailed risk levels with clear explanations helping you understand potential threats and make informed decisions.",
-    to: "/overview#detection-share",
+    to: "/",
   },
   {
     icon: Eye,
@@ -62,7 +62,7 @@ const features: FeatureItem[] = [
     title: "Detailed Reports",
     description:
       "Comprehensive security reports with actionable insights, threat breakdowns, and safety recommendations.",
-    to: "/overview",
+    to: "/",
   },
 ];
 
@@ -96,8 +96,8 @@ export function Features() {
 
   const ctaLabel = (to?: string) => {
     if (!to) return "";
-    if (to.startsWith("/overview#")) return "View in Overview →";
-    if (to === "/overview") return "Open Overview →";
+    if (to.startsWith("/overview#")) return "";
+    if (to === "/overview") return "";
     if (to.startsWith("/about")) return "Read policy →";
     if (to === "/scamcheck" || to === "/") return "Try ScamCheck →";
     if (to.startsWith("/report")) return "Report a scam →";
