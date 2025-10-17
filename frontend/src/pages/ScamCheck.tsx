@@ -1,7 +1,7 @@
 import React from 'react';
 import { Hero } from '@/components/Hero';
 import { Features } from '@/components/Features';
-import { About } from '@/components/About';
+//import { About } from '@/components/About';
 import ScamIntro from '@/components/ScamIntro'; 
 import InsightsPeek from "@/components/InsightsPeek";
 import './ScamCheck.css'; 
@@ -24,9 +24,9 @@ const ScamCheck: React.FC = () => {
           <Features />
         </section>
 
-        <section className="scamcheck-section">
+        {/*<section className="scamcheck-section">
           <About />
-        </section>
+        </section>*/}
       </div>
     </div>
   );
